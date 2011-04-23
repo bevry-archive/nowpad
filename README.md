@@ -15,16 +15,19 @@
 
 ## Features
 
-* Sync the same textarea between two different clients
+* Sync the same textarea between multiple clients
 * Keep the cursor positions intact
 * Only the difference is sent between clients
 
 ## Todo
 
-* Server should keep a copy of the document to send to new clients
 * Ensure it works with multiple people typing at the same time
+* Add support for multiple documents/textareas
 
 ## History
+
+- v0.3
+	- Server now keeps a copy of the document
 
 - v0.2
 	- Working on a type together basis with two people

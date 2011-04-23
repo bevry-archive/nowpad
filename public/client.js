@@ -37,6 +37,11 @@
 				},500);
 			};
 
+    // Load
+    window.now.loadPad = function(_value){
+    	last = doc.value = _value;
+    };
+
 		// Init
     window.now.name = prompt("What's your name?", "");
 
