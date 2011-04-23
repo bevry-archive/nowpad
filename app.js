@@ -28,7 +28,7 @@ app.get('/', function(req, res){
 });
 
 // Init
-app.listen(8080);
+app.listen(9570);
 console.log("Express server listening on port %d", app.address().port);
 
 // Now
@@ -66,7 +66,7 @@ everyone.now.sendPatch = function(_patches,_callback){
   		console.log('Released: ',this.now.name,clientsReady)
 			++clientsReady;
 
-			// Unclock
+			// Unlock
 			if ( clientsReady === clients ) {
 				locked = false;
 			}
