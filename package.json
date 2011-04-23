@@ -1,0 +1,53 @@
+{
+	"name": "nowpad",
+	"version": "0.1.0",
+	"description": "Realtime Text Collaboration",
+	"homepage": "https://github.com/balupton/nowpad",
+	"keywords": [
+		"javascript",
+		"collab",
+		"collaboration",
+		"sync",
+		"realtime"
+	],
+	"author": {
+		"name": "Benjamin Lupton",
+		"email": "b@lupton.cc",
+		"web": "http://balupton.com"
+	},
+	"maintainers": [
+		{
+			"name": "Benjamin Lupton",
+			"email": "b@lupton.cc",
+			"web": "http://balupton.com"
+		}
+	],
+	"contributors": [
+		{
+			"name": "Benjamin Lupton",
+			"email": "b@lupton.cc",
+			"web": "http://balupton.com"
+		}
+	],
+	"bugs": {
+		"web": "https://github.com/balupton/nowpad/issues"
+	},
+	"licenses": [
+		{
+			"type": "MIT",
+			"url": "http://creativecommons.org/licenses/MIT/"
+		}
+	],
+	"repository" : {
+		"type" : "git",
+		"url" : "http://github.com/balupton/nowpad.git"
+	},
+	"dependencies": {
+	   "now": ">=0.5.2",
+	   "express": ">=2.2.2"
+	},
+	"engines" : {
+		"node": ">=0.4.0"
+	},
+	"main": "./app"
+}

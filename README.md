@@ -1,27 +1,29 @@
 # NowPad: Realtime Text Collaboration
 
+## Uses
 
-### Get Started
+* [Node.js](http://nodejs.org) - Server Side Javascript
+* [Express.js](http://expressjs.com/) - The "Server" in Server Side Javascript
+* [Now.js](http://nowjs.com/) - Server and Client Side Communication
 
-``` bash
-git clone git://github.com/balupton/nowpad.git
-cd nowpad
-node app.js # http://localhost:8080/
-```
+## Get Started
 
-### Features
+	git clone git://github.com/balupton/nowpad.git
+	cd nowpad
+	npm install
+	node app.js # http://localhost:8080/
+
+## Features
 
 * Sync the same textarea between two different clients
 * Keep the cursor positions intact
 * Only the difference is sent between clients
 
-
-### Todo
+## Todo
 
 * Server should keep a copy of the document to send to new clients
-* Should work with multiple textareas
 
-### License
+## License
 
 Licensed under the [MIT License](http://creativecommons.org/licenses/MIT/)
 Copyright 2011 [Benjamin Arthur Lupton](http://balupton.com)
