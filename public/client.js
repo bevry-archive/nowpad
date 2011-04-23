@@ -9,27 +9,8 @@
 		var
 			$doc = $('#doc'),
 			doc = $doc.get(0),
-			last = doc.value;
-
-		// Init
-    window.now.name = prompt("What's your name?", "");
-
-		// Receive
-		window.now.receiveMessage = function(name,patchesStr){
-			// Apply
-			if ( name !== window.now.name ) {
-				var result = nowpadCommon.applyPatches(patchesStr,doc.value,doc.selectionStart,doc.selectionEnd);
-				doc.value = result.value;
-				doc.selectionStart = result.a;
-				doc.selectionEnd = result.z;
-			}
-
-			// Update
-			last = doc.value;
-		}
-
-		// Send
-		var
+			last = doc.value,
+			patches = [],
 			timer,
 			timerReset = function(){
 				if ( timer ) {
@@ -37,10 +18,56 @@
 					timer = false;
 				}
 				timer = setTimeout(function(){
-  				var patchesStr = nowpadCommon.generatePatches(last, doc.value);
-					window.now.distributeMessage(patchesStr);
+  				var patch = nowpadCommon.createPatch(last, doc.value);
+  				if ( patch ) {
+  					patches.push(patch);
+  				}
+  				if ( !patches.length ) {
+  					return;
+  				}
+					window.now.sendPatch(patches,function(_result){
+						if ( !_result ) {
+							console.log('Waiting');
+							timerReset();
+						}
+						else {
+							patches = [];
+						}
+					});
 				},500);
 			};
+
+		// Init
+    window.now.name = prompt("What's your name?", "");
+
+		// Receive
+		window.now.applyPatch = function(_name,_patches,_callback){
+			// Apply
+			if ( _name !== window.now.name ) {
+				// Prepare
+				var patch = nowpadCommon.createPatch(last, doc.value);
+				if ( patch ) {
+					patches.push(patch)
+				}
+
+				// Apply
+				for ( var i=0,n=_patches.length; i<n; ++i ) {
+					var result = nowpadCommon.applyPatch(_patches[i],doc.value,doc.selectionStart,doc.selectionEnd);
+					doc.value = result.value;
+					doc.selectionStart = result.a;
+					doc.selectionEnd = result.z;
+				}
+			}
+
+			// Update
+			last = doc.value;
+			timerReset();
+
+			// Notify
+			_callback();
+		}
+
+		// Send
 		$doc.keyup(function(){
 			timerReset();
 		});

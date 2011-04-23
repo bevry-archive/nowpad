@@ -22,6 +22,15 @@
 ## Todo
 
 * Server should keep a copy of the document to send to new clients
+* Ensure it works with multiple people typing at the same time
+
+## History
+
+- v0.2
+	- Working on a type together basis with two people
+
+- v0.1
+	- Working on a start and stop basis
 
 ## License
 

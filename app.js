@@ -32,16 +32,35 @@ console.log("Express server listening on port %d", app.address().port);
 
 // Now
 var
-	everyone = now.initialize(app);
+	everyone = now.initialize(app),
+	locked = false, clients = 0, clientsReady = 0;
 
 // Binds
 everyone.connected(function(){
+	++clients;
 	console.log("Joined: " + this.now.name);
 });
 everyone.disconnected(function(){
+	--clients;
 	console.log("Left: " + this.now.name);
 });
-everyone.now.distributeMessage = function(patches){
-	console.log('Received Message');
-  everyone.now.receiveMessage(this.now.name, patches);
+everyone.now.sendPatch = function(patch,callback){
+	var result = false;
+	if ( !locked ) {
+		locked = this.now.name;
+		clientsReady = 0;
+		console.log('Received Message: '+this.now.name,patch);
+  	everyone.now.applyPatch(this.now.name,patch,function(){
+  		console.log('Released: ',this.now.name,clientsReady)
+			++clientsReady;
+			if ( clientsReady === clients ) {
+				locked = false;
+			}
+  	});
+  	result = true;
+  }
+  else {
+  	console.log('Waiting: ',locked,clientsReady);
+  }
+  callback(result);
 };

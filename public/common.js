@@ -8,13 +8,13 @@
 			value = value.substring(0,a)+A+value.substring(a,z)+Z+value.substring(z);
 			return value;
 		},
-		generatePatches: function(a,b){
+		createPatch: function(a,b){
 			var
   			patches = dmp.patch_make(a,b),
   			patchesStr = dmp.patch_toText(patches);
   		return patchesStr;
 		},
-		applyPatches: function(patchesStr,value,a,z) {
+		applyPatch: function(patchesStr,value,a,z) {
 			// Prepare
 			var
 				patches = dmp.patch_fromText(patchesStr),
