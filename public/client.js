@@ -73,16 +73,18 @@
 				var i, newValue = this.lastValue, a, z;
 
 				// Cursor Positions
-				//a = this.doc.selectionStart;
-				//z = this.doc.selectionEnd;
+				a = this.doc.selectionStart;
+				z = this.doc.selectionEnd;
 
 				// Apply Patches
 				for ( i=0; i<_patches.length; ++i ) {
 					// Apply Patch
-					result = nowpadCommon.applyPatch(_patches[i],newValue);//,a,z);
+					result = nowpadCommon.applyPatch(_patches[i],newValue,a,z);
 					newValue = result.value;
-					//a = result.a;
-					//z = result.z;
+					if ( doc.value !== newValue ) {
+						a = result.a;
+						z = result.z;
+					}
 				}
 
 				// Update Value
@@ -90,8 +92,8 @@
 				this.lastValue = doc.value = newValue;
 
 				// Cursor Positions
-				//this.doc.selectionStart = a;
-				//this.doc.selectionEnd = z;
+				this.doc.selectionStart = a;
+				this.doc.selectionEnd = z;
 			},
 
 			/**

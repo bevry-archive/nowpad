@@ -26,6 +26,9 @@
 
 ## History
 
+- v0.4
+	- New algorithm which ensures data will never get corrupted
+
 - v0.3
 	- Server now keeps a copy of the document
 
