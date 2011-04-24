@@ -2,130 +2,176 @@
 	// Prepare
 	var
 		jQuery = window.jQuery, $ = jQuery,
-		nowpadCommon = window.nowpadCommon;
+		nowpadCommon = window.nowpadCommon,
+		nowpadClient = {
+			// Elements
+			$stat: null,
+			state: null,
+			$doc: null,
+			doc: null,
 
-	// Handle
-	$(function(){
-		var
-			$stat = $('#stat'),
-			state = $stat.get(0),
-			$doc = $('#doc'),
-			doc = $doc.get(0),
-			lastValue = doc.value,
-			patches = [],
-			timer,
-			timerClear = function(){
-				if ( timer ) {
-					clearTimeout(timer);
-					timer = false;
+			// Variables
+			id: null,
+			lastValue: '',
+			currentState: false,
+			timer: false,
+			timerDelay: 2000,
+
+			/**
+			 * Initialise our Client
+			 */
+			init: function(){
+				// Prepare
+				var me = this;
+
+				// domReady
+				$(function(){
+					me.domReady();
+				});
+			},
+
+			/**
+			 * Initialise on domReady
+			 */
+			domReady: function(){
+				// Prepare
+				var me = this;
+
+				// Elements
+				this.$stat = $('#stat');
+				this.state = this.$stat.get(0);
+				this.$doc = $('#doc');
+				this.doc = this.$doc.get(0);
+
+				// Bind Now
+				window.now.registered = function(_id){
+					me.registered(_id);
+				};
+
+				// Bind Dom
+				this.$doc.keyup(function(){
+					me.reset();
+				});
+			},
+
+			/**
+			 * Register a Client Instance with the Server
+			 */
+			registered: function(_id){
+				// Apply Id
+				document.title = this.id = _id;
+
+				// Init Sync
+				this.reset();
+			},
+
+			/**
+			 * Synchronise the Client between the Server
+			 */
+			sync: function(_patches,_newState){
+				// Prepare
+				var i, newValue = this.lastValue, a, z;
+
+				// Cursor Positions
+				//a = this.doc.selectionStart;
+				//z = this.doc.selectionEnd;
+
+				// Apply Patches
+				for ( i=0; i<_patches.length; ++i ) {
+					// Apply Patch
+					result = nowpadCommon.applyPatch(_patches[i],newValue);//,a,z);
+					newValue = result.value;
+					//a = result.a;
+					//z = result.z;
+				}
+
+				// Update Value
+				this.currentState = _newState;
+				this.lastValue = doc.value = newValue;
+
+				// Cursor Positions
+				//this.doc.selectionStart = a;
+				//this.doc.selectionEnd = z;
+			},
+
+			/**
+			 * Clear a Request for Synchronisation
+			 */
+			clear: function(){
+				// Handle
+				if ( this.timer ) {
+					clearTimeout(this.timer);
+					this.timer = false;
 				}
 			},
-			timerReset = function(){
-				timerClear();
-				timer = setTimeout(function(){
-					// Check
-					var
-						newValue = doc.value,
-						newHash = nowpadCommon.hash(newValue),
-						patch = nowpadCommon.createPatch(lastValue, newValue),
-						success = function(){
-							lastValue = newValue;
-							window.now.unlock();
-						};
 
-					// Get Lock
-					if ( patch ) {
-						stat.value = 'locking';
-						window.now.lock(function(_result){
-							// Success
-							if ( (_result) ) {
-								patch = nowpadCommon.createPatch(lastValue, newValue);
-								stat.value = 'sending patch';
-								window.now.sendPatch(patch,newHash,function(_result){
-									if ( !_result ) {
-										stat.value = 'sending value';
-										window.now.sendValue(newValue,function(_result){
-											stat.value = 'sent value';
-											success();
-										});
-									}
-									else {
-										stat.value = 'sent patch';
-										success();
-									}
-								});
+			/**
+			 * Reset a Request for Synchronisation
+			 */
+			reset: function(){
+				// Prepare
+				var me = this;
+
+				// Clear
+				this.clear();
+
+				// Initialise
+				this.timer = setTimeout(function(){
+					me.request();
+				},this.timerDelay);
+			},
+
+			/**
+			 * Prepare a Request for Synchronisation
+			 */
+			request: function(){
+				// Prepare
+				var me = this, patch;
+
+				// Log
+				// console.log('Locking');
+
+				// Grab a Lock
+				window.now.lock(function(_result){
+					// Success
+					if ( _result ) {
+						// We got the lock
+						// console.log('Synching');
+
+						// Retrieve our patch
+						patch = nowpadCommon.createPatch(me.lastValue, doc.value),
+
+						// Synchronise
+						window.now.sync(me.currentState, patch, function(_patches,_newState){
+							// Updates?
+							if ( _patches.length ) {
+								// Log
+								console.log('Applying', _patches, _newState);
+
+								// Synchronise
+								me.sync(_patches,_newState);
 							}
-							// Error
-							else {
-								stat.value = 'waiting';
-								timerReset();
-							}
+
+							// Unlock
+							window.now.unlock();
+
+							// Sync Later
+							me.reset();
 						});
 					}
-			},2000);
+					// Fail
+					else {
+						// We didn't get the lock
+						// console.log('Locking failed');
+
+						// Sync Later
+						me.reset();
+					}
+				});
+			}
 		};
 
-    // Load
-    window.now.loadPad = function(_value){
-    	lastValue = doc.value = _value;
-    };
-
-		// Init
-    window.now.name = prompt("What's your name?", "");
-
-		// Receive
-		window.now.applyPatch = function(_name,_patch,_hash,_callback){
-			// Prepare
-			timerClear();
-
-			// Apply
-			if ( false && _name !== window.now.name ) {
-				stat.value = 'applying';
-  			$doc.attr('readonly','readonly');
-
-				// Prepare
-				var
-					newValue = doc.value,
-					patch = nowpadCommon.createPatch(lastValue,newValue),
-					result, success = function(){
-						doc.value = lastValue = newValue;
-  					$doc.attr('readonly','');
-  				};
-
-
-				// Apply
-				result = nowpadCommon.applyPatch(_patch,newValue);
-				newValue = result.value;
-
-				// Check
-				if ( nowpadCommon.hash(newValue) !== _hash ) {
-					// Conflict
-					window.now.fetchValue(function(_value){
-						// Apply Recent Local Changes
-						result = nowpadCommon.applyPatch(_patch,_value);
-						newValue = result.value;
-
-						// Patched
-						success();
-					});
-				}
-				else {
-					// Patched
-					success();
-				}
-
-				stat.value = 'applied';
-			}
-
-			// Notify
-			_callback();
-			timerReset();
-		}
-
-		// Send
-		$doc.keyup(function(){
-			timerReset();
-		});
-	});
+	// Initialise Client
+	nowpadClient.init();
 
 })(window);

@@ -34,96 +34,122 @@ console.log("Express server listening on port %d", app.address().port);
 // Now
 var
 	everyone = now.initialize(app),
-	value = '', locked = false, clients = 0, clientsReady = 0;
+	value = '', states = [], locked = false, clientCount = 0, clients = {};
 
 /**
  * Setup a new client
  */
 everyone.connected(function(){
+	// Generate an ID
+	var id;
+	while ( true ) {
+		id = String(Math.floor(Math.random()*1000));
+		if ( typeof clients[id] === 'undefined' ) {
+			break;
+		}
+	}
+	this.now.id = id;
+
+	// Setup Client Information
+	this.now.info = clients[id] = {
+		id: id
+	};
+
+	// Increment Count
 	++clients;
-	console.log("Joined: " + this.now.name);
-	this.now.loadPad(value);
+
+	// Log
+	console.log("Joined:", this.now.id);
+
+	// Next
+	this.now.registered(this.now.id);
 });
 
 /**
  * Destroy an old client
  */
 everyone.disconnected(function(){
+	// Delete Client Information
+	delete clients[this.now.id];
+
+	// Decrement Count
 	--clients;
-	console.log("Left: " + this.now.name);
+
+	// Log
+	console.log("Left:", this.now.id);
 });
 
 /**
  * Lock the pad
+ * @return {boolean} was the lock successful
  */
 everyone.now.lock = function(_callback){
-	console.log('Locked');
-	locked = this.now.name;
-	_callback(locked);
+	// Prepare
+	var result = false;
+
+	// Check
+	if ( !locked ) {
+		// Lock
+		locked = this.now.id;
+
+		// Log
+		// console.log('Locked:', this.now.id);
+
+		// Result
+		result = true;
+	}
+
+	// Next
+	_callback(result);
 };
 
 /**
  * Unlock the pad
  */
 everyone.now.unlock = function(){
-	console.log('Unlocked');
+	// Unlock
 	locked = false;
-};
 
-/**
- * Send the Value
- */
-everyone.now.sendValue = function(_value,_callback){
-	console.log('Received Value');
-	value = _value;
-	_callback(true);
-};
-
-/**
- * Fetch the Value
- */
-everyone.now.fetchValue = function(_callback){
-	_callback(value);
+	// Log
+	// console.log('Unlocked:', this.now.id);
 };
 
 /**
  * Send the Patch
  */
-everyone.now.sendPatch = function(_patch,_hash,_callback){
+everyone.now.sync = function(_state,_patch,_callback){
 	// Prepare
-	var result;
+	var result, patches = [], i, n = states.length;
 
-	// Lock
-	clientsReady = 0;
+	// Check State
+	if ( _state !== n ) {
+		// Requires Updates
+		console.log('Synching:', this.now.id, 'from', _state, 'to', n);
 
-	// Apply
-	console.log('Received Patch');
-	result = nowpadCommon.applyPatch(_patch,value);
-	if ( !result.pass ) {
-		console.log('Failed Patch');
-		_callback(false);
-		return;
+		// Add Prior Patches
+		for ( i=_state||0; i<n; ++i ) {
+			patches.push(states[i]);
+		}
 	}
-	value = result.value;
 
-	// Compare
-	if ( nowpadCommon.hash(value) !== _hash ) {
-		// Conflict
-		console.log('Failed Hash');
-		_callback(false);
-	}
-	else {
-		// Patch Successfully
-		everyone.now.applyPatch(this.now.name,_patch,_hash,function(){
-			// Applied
-			console.log('Applied Patch')
-			++clientsReady;
+	// Handle
+	if ( _patch ) {
+		// We have a difference
+		console.log('Received Patch:', this.now.id, n+1);
 
-			// Unlock
-			if ( clientsReady === clients ) {
-				console.log('Completed Patching')
-				_callback(true);
-			}
-		});
+		// Add Patch
+		patches.push(_patch);
+		states.push(_patch);
+		++n;
+
+		// Apply Patch
+		result = nowpadCommon.applyPatch(_patch,value);
+		value = result.value;
+
+		// Log
+		console.log(value);
 	}
+
+	// Return Patches
+	_callback(patches,n);
 };
