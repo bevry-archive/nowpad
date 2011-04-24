@@ -15,7 +15,7 @@
 			lastValue: '',
 			currentState: false,
 			timer: false,
-			timerDelay: 500,
+			timerDelay: 1000,
 
 			/**
 			 * Initialise our Client
@@ -139,6 +139,9 @@
 				// Log
 				// console.log('Locking');
 
+				// Feedback
+				this.$doc.addClass('syncing');
+
 				// Grab a Lock
 				window.now.lock(function(_result){
 					// Success
@@ -163,14 +166,17 @@
 							// Unlock
 							window.now.unlock();
 
-							// Sync Later
-							// me.reset();
+							// Feedback
+							me.$doc.removeClass('syncing');
 						});
 					}
 					// Fail
 					else {
 						// We didn't get the lock
 						// console.log('Locking failed');
+
+						// Feedback
+						me.$doc.removeClass('syncing');
 
 						// Try Again Later
 						me.reset();

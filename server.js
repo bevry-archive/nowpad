@@ -148,11 +148,13 @@ everyone.now.sync = function(_state,_patch,_callback){
 
 		// Log
 		// console.log(value);
-
-		// Notify
-		everyone.now.notify(n);
 	}
 
 	// Return Patches
 	_callback(patches,n);
+
+	// Notify
+	if ( _patch ) {
+		everyone.now.notify(n);
+	}
 };
