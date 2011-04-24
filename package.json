@@ -44,7 +44,8 @@
 	},
 	"dependencies": {
 	   "now": ">=0.5.2",
-	   "express": ">=2.2.2"
+	   "express": ">=2.2.2",
+	   "ejs": ">=0.4.1"
 	},
 	"engines" : {
 		"node": ">=0.4.0"
