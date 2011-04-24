@@ -3,7 +3,7 @@
 	var
 		jQuery = window.jQuery, $ = jQuery,
 		nowpadCommon = window.nowpadCommon,
-		nowpadClient = {
+		nowpadClient = window.nowpadClient = {
 			// Elements
 			$stat: null,
 			state: null,
@@ -15,7 +15,7 @@
 			lastValue: '',
 			currentState: false,
 			timer: false,
-			timerDelay: 1000,
+			timerDelay: 500,
 
 			/**
 			 * Initialise our Client
@@ -38,8 +38,6 @@
 				var me = this;
 
 				// Elements
-				this.$stat = $('#stat');
-				this.state = this.$stat.get(0);
 				this.$doc = $('#doc');
 				this.doc = this.$doc.get(0);
 
@@ -53,6 +51,13 @@
 						me.reset();
 					});
 				};
+
+				// Bind Notify
+				window.now.notify = function(_state){
+					if ( _state !== me.currentState ) {
+						me.reset();
+					}
+				}
 			},
 
 			/**
@@ -159,7 +164,7 @@
 							window.now.unlock();
 
 							// Sync Later
-							me.reset();
+							// me.reset();
 						});
 					}
 					// Fail
@@ -167,7 +172,7 @@
 						// We didn't get the lock
 						// console.log('Locking failed');
 
-						// Sync Later
+						// Try Again Later
 						me.reset();
 					}
 				});
