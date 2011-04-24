@@ -121,6 +121,17 @@ everyone.now.unlock = function(){
 };
 
 /**
+ * Log
+ */
+everyone.now.log = function(){
+	console.log({
+		lock: locked,
+		clientCount: clientCount,
+		clients: clients
+	});
+};
+
+/**
  * Send the Patch
  */
 everyone.now.sync = function(_state,_patch,_callback){
@@ -141,7 +152,7 @@ everyone.now.sync = function(_state,_patch,_callback){
 	// Handle
 	if ( _patch ) {
 		// We have a difference
-		console.log('Received Patch:', this.now.id, n+1);
+		console.log('Received Patch:', this.now.id, n+1, _patch);
 
 		// Add Patch
 		patches.push(_patch);

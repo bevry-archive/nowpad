@@ -24,6 +24,25 @@
 				// Prepare
 				var me = this;
 
+				// Now
+				window.now.ready(function(){
+					// Bind Now
+					window.now.meet(function(_id){
+						// Apply Id
+						document.title = me.id = _id;
+
+						// Init Sync
+						me.reset();
+					});
+
+					// Bind Notify
+					window.now.notify = function(_state){
+						if ( _state !== me.currentState ) {
+							me.reset();
+						}
+					};
+				});
+
 				// domReady
 				$(function(){
 					me.domReady();
@@ -41,28 +60,9 @@
 				this.$doc = $('#doc');
 				this.doc = this.$doc.get(0);
 
-				// Now
-				window.now.ready(function(){
-					// Bind Now
-					window.now.meet(function(_id){
-						// Apply Id
-						document.title = this.id = _id;
-
-						// Init Sync
-						me.reset();
-
-						// Bind Dom
-						me.$doc.keyup(function(){
-							me.reset();
-						});
-					});
-
-					// Bind Notify
-					window.now.notify = function(_state){
-						if ( _state !== me.currentState ) {
-							me.reset();
-						}
-					};
+				// Events
+				me.$doc.keyup(function(){
+					me.reset();
 				});
 			},
 
@@ -130,6 +130,11 @@
 			request: function(){
 				// Prepare
 				var me = this, patch;
+
+				// Status
+				if ( !this.id ) {
+					return false;
+				}
 
 				// Log
 				// console.log('Locking');
