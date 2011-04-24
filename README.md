@@ -11,7 +11,7 @@
 	git clone git://github.com/balupton/nowpad.git
 	cd nowpad
 	npm install
-	node app.js # http://localhost:8080/
+	node server.js # http://localhost:9572/
 
 ## Features
 
