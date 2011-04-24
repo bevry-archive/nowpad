@@ -41,34 +41,29 @@
 				this.$doc = $('#doc');
 				this.doc = this.$doc.get(0);
 
-				// Bind Now
-				window.now.registered = function(_id){
-					// Registered
-					me.registered(_id);
+				// Now
+				window.now.ready(function(){
+					// Bind Now
+					window.now.meet(function(_id){
+						// Apply Id
+						document.title = this.id = _id;
 
-					// Bind Dom
-					me.$doc.keyup(function(){
+						// Init Sync
 						me.reset();
+
+						// Bind Dom
+						me.$doc.keyup(function(){
+							me.reset();
+						});
 					});
-				};
 
-				// Bind Notify
-				window.now.notify = function(_state){
-					if ( _state !== me.currentState ) {
-						me.reset();
-					}
-				}
-			},
-
-			/**
-			 * Register a Client Instance with the Server
-			 */
-			registered: function(_id){
-				// Apply Id
-				document.title = this.id = _id;
-
-				// Init Sync
-				this.reset();
+					// Bind Notify
+					window.now.notify = function(_state){
+						if ( _state !== me.currentState ) {
+							me.reset();
+						}
+					};
+				});
 			},
 
 			/**
@@ -87,7 +82,7 @@
 					// Apply Patch
 					result = nowpadCommon.applyPatch(_patches[i],newValue,a,z);
 					newValue = result.value;
-					if ( doc.value !== newValue ) {
+					if ( this.doc.value !== newValue ) {
 						a = result.a;
 						z = result.z;
 					}
@@ -95,7 +90,7 @@
 
 				// Update Value
 				this.currentState = _newState;
-				this.lastValue = doc.value = newValue;
+				this.lastValue = this.doc.value = newValue;
 
 				// Cursor Positions
 				this.doc.selectionStart = a;
@@ -150,7 +145,7 @@
 						// console.log('Synching');
 
 						// Retrieve our patch
-						patch = nowpadCommon.createPatch(me.lastValue, doc.value),
+						patch = nowpadCommon.createPatch(me.lastValue, me.doc.value),
 
 						// Synchronise
 						window.now.sync(me.currentState, patch, function(_patches,_newState){

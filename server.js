@@ -60,9 +60,6 @@ everyone.connected(function(){
 
 	// Log
 	console.log("Joined:", this.now.id);
-
-	// Next
-	this.now.registered(this.now.id);
 });
 
 /**
@@ -78,6 +75,15 @@ everyone.disconnected(function(){
 	// Log
 	console.log("Left:", this.now.id);
 });
+
+/**
+ * Meet the client
+ * @return {integer} id
+ */
+everyone.now.meet = function(_callback){
+	// Next
+	_callback(this.now.id);
+};
 
 /**
  * Lock the pad
