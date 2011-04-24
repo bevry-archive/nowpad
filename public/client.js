@@ -7,69 +7,119 @@
 	// Handle
 	$(function(){
 		var
+			$stat = $('#stat'),
+			state = $stat.get(0),
 			$doc = $('#doc'),
 			doc = $doc.get(0),
-			last = doc.value,
+			lastValue = doc.value,
 			patches = [],
 			timer,
-			timerReset = function(){
+			timerClear = function(){
 				if ( timer ) {
 					clearTimeout(timer);
 					timer = false;
 				}
+			},
+			timerReset = function(){
+				timerClear();
 				timer = setTimeout(function(){
-  				var patch = nowpadCommon.createPatch(last, doc.value);
-  				if ( patch ) {
-  					patches.push(patch);
-  				}
-  				if ( !patches.length ) {
-  					return;
-  				}
-					window.now.sendPatch(patches,function(_result){
-						if ( !_result ) {
-							console.log('Waiting');
-							timerReset();
-						}
-						else {
-							patches = [];
-						}
-					});
-				},500);
-			};
+					// Check
+					var
+						newValue = doc.value,
+						newHash = nowpadCommon.hash(newValue),
+						patch = nowpadCommon.createPatch(lastValue, newValue),
+						success = function(){
+							lastValue = newValue;
+							window.now.unlock();
+						};
+
+					// Get Lock
+					if ( patch ) {
+						stat.value = 'locking';
+						window.now.lock(function(_result){
+							// Success
+							if ( (_result) ) {
+								patch = nowpadCommon.createPatch(lastValue, newValue);
+								stat.value = 'sending patch';
+								window.now.sendPatch(patch,newHash,function(_result){
+									if ( !_result ) {
+										stat.value = 'sending value';
+										window.now.sendValue(newValue,function(_result){
+											stat.value = 'sent value';
+											success();
+										});
+									}
+									else {
+										stat.value = 'sent patch';
+										success();
+									}
+								});
+							}
+							// Error
+							else {
+								stat.value = 'waiting';
+								timerReset();
+							}
+						});
+					}
+			},2000);
+		};
 
     // Load
     window.now.loadPad = function(_value){
-    	last = doc.value = _value;
+    	lastValue = doc.value = _value;
     };
 
 		// Init
     window.now.name = prompt("What's your name?", "");
 
 		// Receive
-		window.now.applyPatch = function(_name,_patches,_callback){
+		window.now.applyPatch = function(_name,_patch,_hash,_callback){
+			// Prepare
+			timerClear();
+
 			// Apply
-			if ( _name !== window.now.name ) {
+			if ( false && _name !== window.now.name ) {
+				stat.value = 'applying';
+  			$doc.attr('readonly','readonly');
+
 				// Prepare
-				var patch = nowpadCommon.createPatch(last, doc.value);
-				if ( patch ) {
-					patches.push(patch)
-				}
+				var
+					newValue = doc.value,
+					patch = nowpadCommon.createPatch(lastValue,newValue),
+					result, success = function(){
+						doc.value = lastValue = newValue;
+  					$doc.attr('readonly','');
+  				};
+
 
 				// Apply
-				for ( var i=0,n=_patches.length; i<n; ++i ) {
-					var result = nowpadCommon.applyPatch(_patches[i],doc.value,doc.selectionStart,doc.selectionEnd);
-					doc.value = result.value;
-					doc.selectionStart = result.a;
-					doc.selectionEnd = result.z;
-				}
-			}
+				result = nowpadCommon.applyPatch(_patch,newValue);
+				newValue = result.value;
 
-			// Update
-			last = doc.value;
-			timerReset();
+				// Check
+				if ( nowpadCommon.hash(newValue) !== _hash ) {
+					// Conflict
+					window.now.fetchValue(function(_value){
+						// Apply Recent Local Changes
+						result = nowpadCommon.applyPatch(_patch,_value);
+						newValue = result.value;
+
+						// Patched
+						success();
+					});
+				}
+				else {
+					// Patched
+					success();
+				}
+
+				stat.value = 'applied';
+			}
 
 			// Notify
 			_callback();
+			timerReset();
 		}
 
 		// Send

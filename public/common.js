@@ -3,6 +3,9 @@
 	if ( typeof diff_match_path === 'undefined' && typeof require !== 'undefined' ) {
 		diff_match_patch = require(__dirname+'/diff_match_patch.js').diff_match_patch;
 	}
+	if ( typeof MD5 === 'undefined' && typeof require !== 'undefined' ) {
+		MD5 = require(__dirname+'/md5.js').MD5;
+	}
 
 	// Prepare
 	var dmp = new diff_match_patch();
@@ -18,6 +21,10 @@
 			}
 			return value;
 		},
+		hash: function(value){
+			var hash = MD5(value);
+  		return hash;
+		},
 		createPatch: function(a,b){
 			var
   			patches = dmp.patch_make(a,b),
@@ -28,7 +35,8 @@
 			// Prepare
 			var
 				patches = dmp.patch_fromText(patchesStr),
-				l = z-a;
+				l = z-a,
+				result, pass = false;
 
 			// Encode
 			if ( a || z ) {
@@ -37,7 +45,9 @@
 			}
 
 			// Apply
-			value = dmp.patch_apply(patches, value)[0];
+			result = dmp.patch_apply(patches, value);
+			value = result[0];
+			pass = result[1][0]||false;
 
 			// Decode
 			if ( a || z ) {
@@ -66,6 +76,7 @@
 
 			// Return
 			return {
+				pass: pass,
 				value: value,
 				a: a,
 				z: z

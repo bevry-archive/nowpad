@@ -36,47 +36,94 @@ var
 	everyone = now.initialize(app),
 	value = '', locked = false, clients = 0, clientsReady = 0;
 
-// Binds
+/**
+ * Setup a new client
+ */
 everyone.connected(function(){
 	++clients;
 	console.log("Joined: " + this.now.name);
 	this.now.loadPad(value);
 });
+
+/**
+ * Destroy an old client
+ */
 everyone.disconnected(function(){
 	--clients;
 	console.log("Left: " + this.now.name);
 });
-everyone.now.sendPatch = function(_patches,_callback){
+
+/**
+ * Lock the pad
+ */
+everyone.now.lock = function(_callback){
+	console.log('Locked');
+	locked = this.now.name;
+	_callback(locked);
+};
+
+/**
+ * Unlock the pad
+ */
+everyone.now.unlock = function(){
+	console.log('Unlocked');
+	locked = false;
+};
+
+/**
+ * Send the Value
+ */
+everyone.now.sendValue = function(_value,_callback){
+	console.log('Received Value');
+	value = _value;
+	_callback(true);
+};
+
+/**
+ * Fetch the Value
+ */
+everyone.now.fetchValue = function(_callback){
+	_callback(value);
+};
+
+/**
+ * Send the Patch
+ */
+everyone.now.sendPatch = function(_patch,_hash,_callback){
 	// Prepare
-	var result = false;
-	if ( !locked ) {
-		// Lock
-		locked = this.now.name;
-		clientsReady = 0;
+	var result;
 
-		// Apply
-		console.log('Received Message: '+this.now.name,_patches);
-		for ( var i=0,n=_patches.length; i<n; ++i ) {
-			value = nowpadCommon.applyPatch(_patches[i],value).value;
-		}
+	// Lock
+	clientsReady = 0;
 
-		// Forward
-  	everyone.now.applyPatch(this.now.name,_patches,function(){
-  		// Applied
-  		console.log('Released: ',this.now.name,clientsReady)
+	// Apply
+	console.log('Received Patch');
+	result = nowpadCommon.applyPatch(_patch,value);
+	if ( !result.pass ) {
+		console.log('Failed Patch');
+		_callback(false);
+		return;
+	}
+	value = result.value;
+
+	// Compare
+	if ( nowpadCommon.hash(value) !== _hash ) {
+		// Conflict
+		console.log('Failed Hash');
+		_callback(false);
+	}
+	else {
+		// Patch Successfully
+		everyone.now.applyPatch(this.now.name,_patch,_hash,function(){
+			// Applied
+			console.log('Applied Patch')
 			++clientsReady;
 
 			// Unlock
 			if ( clientsReady === clients ) {
-				locked = false;
+				console.log('Completed Patching')
+				_callback(true);
 			}
-  	});
-  	result = true;
-  }
-  else {
-  	console.log('Waiting: ',locked,clientsReady);
-  }
-
-  // Forward
-  _callback(result);
+		});
+	}
 };
