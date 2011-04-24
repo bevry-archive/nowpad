@@ -15,7 +15,7 @@
 			lastValue: '',
 			currentState: false,
 			timer: false,
-			timerDelay: 2000,
+			timerDelay: 1000,
 
 			/**
 			 * Initialise our Client
@@ -45,13 +45,14 @@
 
 				// Bind Now
 				window.now.registered = function(_id){
+					// Registered
 					me.registered(_id);
-				};
 
-				// Bind Dom
-				this.$doc.keyup(function(){
-					me.reset();
-				});
+					// Bind Dom
+					this.$doc.keyup(function(){
+						me.reset();
+					});
+				};
 			},
 
 			/**
