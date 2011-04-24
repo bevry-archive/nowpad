@@ -49,7 +49,7 @@
 					me.registered(_id);
 
 					// Bind Dom
-					this.$doc.keyup(function(){
+					me.$doc.keyup(function(){
 						me.reset();
 					});
 				};
