@@ -27,20 +27,22 @@
 				// Now
 				window.now.ready(function(){
 					// Bind Now
-					window.now.meet(function(_id){
-						// Apply Id
-						document.title = me.id = _id;
+					window.now.meet(
+						// Notify
+						function(_state){
+							if ( _state !== me.currentState ) {
+								me.reset();
+							}
+						},
+						// Callback
+						function(_id){
+							// Apply Id
+							document.title = me.id = _id;
 
-						// Init Sync
-						me.reset();
-					});
-
-					// Bind Notify
-					window.now.notify = function(_state){
-						if ( _state !== me.currentState ) {
+							// Init Sync
 							me.reset();
 						}
-					};
+					);
 				});
 
 				// domReady

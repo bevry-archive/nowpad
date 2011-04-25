@@ -33,7 +33,7 @@ console.log("Express server listening on port %d", app.address().port);
 
 // Now
 var
-	everyone = now.initialize(app),
+	everyone = now.initialize(app, {clientWrite: false}),
 	value = '', states = [], locked = false, clientCount = 0, clients = {};
 
 /**
@@ -80,7 +80,16 @@ everyone.disconnected(function(){
  * Meet the client
  * @return {integer} id
  */
-everyone.now.meet = function(_callback){
+everyone.now.meet = function(_notify,_callback){
+	// Check
+	if ( typeof _notify !== 'function' ) {
+		console.log('Evil client');
+		return false;
+	}
+
+	// Apply Notify
+	this.now.notify = _notify;
+
 	// Next
 	_callback(this.now.id);
 };
