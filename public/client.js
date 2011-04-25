@@ -1,7 +1,10 @@
 (function(window,undefined){
+	"use strict";
+
 	// Prepare
 	var
 		jQuery = window.jQuery, $ = jQuery,
+		console = window.console,
 		nowpadCommon = window.nowpadCommon,
 		nowpadClient = window.nowpadClient = {
 			// Elements
@@ -10,10 +13,17 @@
 			$doc: null,
 			doc: null,
 
-			// Variables
+			// Synchronisation
+			lastSyncedValue: '',
+			lastCurrentValue: '',
+			lastSyncedState: false,
+			newSyncedState: false,
+			newSyncedPatches: [],
+			selectionStart: 0,
+			selectionEnd: 0,
+
+			// Misc
 			id: null,
-			lastValue: '',
-			currentState: false,
 			timer: false,
 			timerDelay: 1000,
 
@@ -23,6 +33,11 @@
 			init: function(){
 				// Prepare
 				var me = this;
+
+				// Check Browser
+				if ( $.browser.msie || typeof console === 'undefined' || typeof console.log === 'undefined' ) {
+					throw Error('Your browser is not supported yet');
+				}
 
 				// Now
 				window.now.ready(function(){
@@ -69,37 +84,6 @@
 			},
 
 			/**
-			 * Synchronise the Client between the Server
-			 */
-			sync: function(_patches,_newState){
-				// Prepare
-				var i, newValue = this.lastValue, a, z;
-
-				// Cursor Positions
-				a = this.doc.selectionStart;
-				z = this.doc.selectionEnd;
-
-				// Apply Patches
-				for ( i=0; i<_patches.length; ++i ) {
-					// Apply Patch
-					result = nowpadCommon.applyPatch(_patches[i],newValue,a,z);
-					newValue = result.value;
-					if ( this.doc.value !== newValue ) {
-						a = result.a;
-						z = result.z;
-					}
-				}
-
-				// Update Value
-				this.currentState = _newState;
-				this.lastValue = this.doc.value = newValue;
-
-				// Cursor Positions
-				this.doc.selectionStart = a;
-				this.doc.selectionEnd = z;
-			},
-
-			/**
 			 * Clear a Request for Synchronisation
 			 */
 			clear: function(){
@@ -131,12 +115,15 @@
 			 */
 			request: function(){
 				// Prepare
-				var me = this, patch;
+				var me = this, patch = null;
 
 				// Status
 				if ( !this.id ) {
 					return false;
 				}
+
+				// Update
+				this.sync();
 
 				// Log
 				// console.log('Locking');
@@ -151,18 +138,31 @@
 						// We got the lock
 						// console.log('Synching');
 
+						// Update current value
+						me.lastCurrentValue = me.doc.value;
+
 						// Retrieve our patch
-						patch = nowpadCommon.createPatch(me.lastValue, me.doc.value);
+						patch = nowpadCommon.createPatch(me.lastSyncedValue, me.lastCurrentValue);
+
+						// Log
+						console.log('Sync send: ['+me.lastSyncedState+'] ['+patch+'] ['+me.lastSyncedValue+'] ['+me.lastCurrentValue+']');
 
 						// Synchronise
-						window.now.sync(me.currentState, patch, function(_patches,_newState){
+						window.now.sync(me.lastSyncedState, patch, function(_patches,_state){
+							// Log
+							console.log('Sync receive:',_patches,_state,this.lastSyncedState,_state);
+
 							// Updates?
 							if ( _patches.length ) {
 								// Log
-								console.log('Applying', _patches, _newState);
+								console.log('Applying', _patches, _state);
 
 								// Synchronise
-								me.sync(_patches,_newState);
+								me.newSyncedPatches = _patches;
+								me.newSyncedState = _state;
+
+								// Apply the Changes when the user has stopped typing
+								me.reset();
 							}
 
 							// Unlock
@@ -184,8 +184,88 @@
 						me.reset();
 					}
 				});
+			},
+
+			/**
+			 * Apply the Client and Server Changes
+			 */
+			sync: function(){
+				// Prepare
+				var
+					i, patch,
+					// Local Values
+					lastCurrentValue = this.lastCurrentValue,
+					newCurrentValue = this.doc.value,
+					// Synced Values
+					newSyncedPatches = this.newSyncedPatches,
+					newSyncedState = this.newSyncedState,
+					newSyncedValue = this.lastSyncedValue;
+
+				// Check if we have something to do
+				if ( !newSyncedPatches.length ) {
+					// Nothing to do
+					return false;
+				}
+
+				// Get Cursor Positions
+				this.selectionStart = this.doc.selectionStart;
+				this.selectionEnd = this.doc.selectionEnd;
+
+				// Apply Synced Patches
+				for ( i=0; i<newSyncedPatches.length; ++i ) {
+					// Apply Patch
+					patch = newSyncedPatches[i];
+					newSyncedValue = this.apply(patch,newSyncedValue);
+				}
+
+				// Apply Sync Changes
+				this.newSyncedPatches = [];
+				this.newSyncedState = false;
+				this.lastSyncedState = newSyncedState;
+				this.lastSyncedValue = newSyncedValue;
+				this.lastCurrentValue = newSyncedValue;
+
+				// Compare Local Changes
+				if ( lastCurrentValue !== newCurrentValue ) {
+					// Generate and Apply the Patch to Synced Changes
+					patch = nowpadCommon.createPatch(lastCurrentValue, newCurrentValue);
+					newCurrentValue = this.apply(patch,newSyncedValue);
+				}
+				else {
+					// Apply Synced Changes
+					newCurrentValue = newSyncedValue;
+				}
+
+				// Apply Local Changes
+				this.doc.value = newCurrentValue;
+
+				// Update Cursor
+				this.doc.selectionStart = this.selectionStart;
+				this.doc.selectionEnd = this.selectionEnd;
+			},
+
+			/**
+			 * Apply a patch to our state
+			 */
+			apply: function(_patch,_value){
+				// Prepare
+				var patchResult, patchValue;
+
+				// Sync Value
+				patchResult = nowpadCommon.applyPatch(_patch,_value,this.selectionStart,this.selectionEnd);
+				patchValue = patchResult.value;
+
+				// Sync and Apply Cursor
+				if ( _value !== patchValue ) {
+					this.selectionStart = patchResult.selectionStart;
+					this.selectionEnd = patchResult.selectionEnd;
+				}
+
+				// Return
+				return patchValue;
 			}
-		};
+		}
+	;
 
 	// Initialise Client
 	nowpadClient.init();

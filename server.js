@@ -147,6 +147,9 @@ everyone.now.sync = function(_state,_patch,_callback){
 	// Prepare
 	var result, patches = [], i, n = states.length;
 
+	// Log
+	console.log('Sync:', this.now.id);
+
 	// Check State
 	if ( _state !== n ) {
 		// Requires Updates
@@ -161,7 +164,7 @@ everyone.now.sync = function(_state,_patch,_callback){
 	// Handle
 	if ( _patch ) {
 		// We have a difference
-		console.log('Received Patch:', this.now.id, n+1, _patch);
+		console.log('Received Patch:', this.now.id, 'from', _state, 'to', n+1, 'patch:', _patch);
 
 		// Add Patch
 		patches.push(_patch);

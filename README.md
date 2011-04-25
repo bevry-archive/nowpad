@@ -26,6 +26,10 @@
 
 ## History
 
+- v0.5
+	- Ignores internet explorer and console less browsers
+	- Now will only apply syncs once the user has finished typing
+
 - v0.4
 	- New algorithm which ensures data will never get corrupted
 

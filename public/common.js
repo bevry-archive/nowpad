@@ -1,4 +1,6 @@
 (function(scope){
+	"use strict";
+
 	// Check
 	if ( typeof diff_match_path === 'undefined' && typeof require !== 'undefined' ) {
 		diff_match_patch = require(__dirname+'/diff_match_patch.js').diff_match_patch;
@@ -9,22 +11,23 @@
 
 	// Define
 	scope.nowpadCommon = {
-		createPatch: function(a,b){
+		createPatch: function(before,after){
 			var
-				patches = dmp.patch_make(a,b),
+				patches = dmp.patch_make(before,after),
 				patchesStr = dmp.patch_toText(patches);
 			return patchesStr;
 		},
-		applyPatch: function(_patchesStr,_value,a,z) {
+		applyPatch: function(_patchesStr,_value,selectionStart,selectionEnd) {
 			// Prepare
 			var
 				patches = dmp.patch_fromText(_patchesStr),
 				result, pass = false,
-				i, ii, patch, mod, diff, start;
+				i, ii, patch, mod, diff, start,
+				value;
 
 			// Ensure
-			a = a || 0;
-			z = z || a || 0;
+			selectionStart = selectionStart || 0;
+			selectionEnd = selectionEnd || selectionStart || 0;
 
 			// Apply
 			result = dmp.patch_apply(patches,_value);
@@ -32,7 +35,7 @@
 			pass = result[1][0]||false;
 
 			// Decode
-			if ( a || z ) {
+			if ( selectionStart || selectionEnd ) {
 
 				// Cycle through patches
 				for ( i=0; i<patches.length; ++i ) {
@@ -52,14 +55,14 @@
 					// Start
 					mod = patch.length2 - patch.length1;
 
-					console.log(patch,a,z,start,mod);
+					console.log(patch,selectionStart,selectionEnd,start,mod);
 
 					// Adjust
-					if ( start < a ) {
-						a += mod;
+					if ( start < selectionStart ) {
+						selectionStart += mod;
 					}
-					if ( start < a || start < z ) {
-						z += mod;
+					if ( start < selectionStart || start < selectionEnd ) {
+						selectionEnd += mod;
 					}
 				}
 			}
@@ -68,8 +71,8 @@
 			return {
 				pass: pass,
 				value: value,
-				a: a,
-				z: z
+				selectionStart: selectionStart,
+				selectionEnd: selectionEnd
 			};
 		}
 	};
