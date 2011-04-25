@@ -26,6 +26,7 @@
 			id: null,
 			timer: false,
 			timerDelay: 1000,
+			isTyping: false,
 
 			/**
 			 * Initialise our Client
@@ -45,7 +46,9 @@
 					window.now.meet(
 						// Notify
 						function(_state){
-							if ( _state !== me.currentState ) {
+							// We've received a change
+							if ( _state !== me.lastSyncedState ) {
+								// And it's not our change
 								me.reset();
 							}
 						},
@@ -103,9 +106,11 @@
 
 				// Clear
 				this.clear();
+				this.isTyping = true;
 
 				// Initialise
 				this.timer = window.setTimeout(function(){
+					this.isTyping = false;
 					me.request();
 				},this.timerDelay);
 			},
@@ -162,7 +167,12 @@
 								me.newSyncedState = _state;
 
 								// Apply the Changes when the user has stopped typing
-								me.reset();
+								if ( this.isTyping ) {
+									me.reset();
+								}
+								else {
+									me.sync();
+								}
 							}
 
 							// Unlock
