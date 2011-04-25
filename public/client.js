@@ -105,7 +105,7 @@
 			clear: function(){
 				// Handle
 				if ( this.timer ) {
-					clearTimeout(this.timer);
+					window.clearTimeout(this.timer);
 					this.timer = false;
 				}
 			},
@@ -121,7 +121,7 @@
 				this.clear();
 
 				// Initialise
-				this.timer = setTimeout(function(){
+				this.timer = window.setTimeout(function(){
 					me.request();
 				},this.timerDelay);
 			},
@@ -152,7 +152,7 @@
 						// console.log('Synching');
 
 						// Retrieve our patch
-						patch = nowpadCommon.createPatch(me.lastValue, me.doc.value),
+						patch = nowpadCommon.createPatch(me.lastValue, me.doc.value);
 
 						// Synchronise
 						window.now.sync(me.currentState, patch, function(_patches,_newState){

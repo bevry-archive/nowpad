@@ -11,9 +11,9 @@
 	scope.nowpadCommon = {
 		createPatch: function(a,b){
 			var
-  			patches = dmp.patch_make(a,b),
-  			patchesStr = dmp.patch_toText(patches);
-  		return patchesStr;
+				patches = dmp.patch_make(a,b),
+				patchesStr = dmp.patch_toText(patches);
+			return patchesStr;
 		},
 		applyPatch: function(_patchesStr,_value,a,z) {
 			// Prepare
