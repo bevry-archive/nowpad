@@ -51,24 +51,19 @@
 							case -1:
 								mod -= diff[1].length;
 								break;
-							case 0:
-								if ( start === null ) {
-									start = diff[1].length;
-								}
-								break;
 							case 1:
 								mod += diff[1].length;
+								break;
+							default:
 								break;
 						}
 					}
 
 					// Adjust
-					if ( start === null ) {
-						start = patch.start1;
+					if ( patch.diffs[0][0] === 0 ) {
+						start = patch.diffs[0][1].length;
 					}
-					else {
-						start += patch.start1;
-					}
+					start += patch.start1;
 
 					// Log
 					// console.log(patch,selectionStart,selectionEnd,start,mod);
