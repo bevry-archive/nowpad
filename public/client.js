@@ -234,6 +234,7 @@
 
 				// Apply Synced Patches
 				for ( i=0; i<newSyncedPatches.length; ++i ) {
+					console.log('remote');
 					// Apply Patch
 					patch = newSyncedPatches[i];
 					newSyncedValue = this.apply(patch,newSyncedValue);
@@ -241,6 +242,7 @@
 
 				// Compare Local Changes
 				if ( lastCurrentValue !== newCurrentValue ) {
+					console.log('local');
 					// Generate and Apply the Patch to Synced Changes
 					patch = nowpadCommon.createPatch(lastCurrentValue, newCurrentValue);
 					newCurrentValue = this.apply(patch,newSyncedValue);
