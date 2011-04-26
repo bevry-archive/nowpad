@@ -18,11 +18,12 @@
 * Sync the same textarea between multiple clients
 * Keep the cursor positions intact
 * Only the difference is sent between clients
+* Data will always remain intact between clients (it will never get corrupted)
+* Potential to work with HTML as well as Text
 
 ## Todo
 
-* Ensure it works with multiple people typing at the same time
-* Add support for multiple documents/textareas
+[The roadmap lays here](https://github.com/balupton/nowpad/wiki/Roadmap)
 
 ## History
 
