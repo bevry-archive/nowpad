@@ -248,7 +248,7 @@
 					console.log('local');
 					// Generate and Apply the Patch to Synced Changes
 					patch = nowpadCommon.createPatch(lastCurrentValue, newCurrentValue);
-					newCurrentValue = this.apply(patch,newSyncedValue,true);
+					newCurrentValue = this.apply(patch,newSyncedValue,_ignoreCursor);
 				}
 				else {
 					// Apply Synced Changes
@@ -285,7 +285,7 @@
 				patchValue = patchResult.value;
 
 				// Sync and Apply Cursor
-				if ( !_ignoreCursor && _value !== patchValue && this.doc.value !== patchValue ) {
+				if ( !_ignoreCursor && _value !== patchValue && this.doc.value !== patchValue && this.doc.value !== _value ) {
 					console.log('['+this.doc.value+']['+_value+']\n['+patchValue+']');
 					this.selectionStart = patchResult.selectionStart;
 					this.selectionEnd = patchResult.selectionEnd;
