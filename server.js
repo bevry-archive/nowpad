@@ -38,7 +38,9 @@ var
 		// Variables
 		value: '',
 		states: [],
+		offset: 0,
 		locked: false,
+		delay: 50,
 		clientCount: 0,
 		clients: {}
 	};
@@ -87,18 +89,30 @@ everyone.disconnected(function(){
  * Meet the client
  * @return {integer} id
  */
-everyone.now.meet = function(_notify,_callback){
+everyone.now.meet = function(_syncNotify,_delayNotify,_callback){
 	// Check
-	if ( typeof _notify !== 'function' ) {
+	if ( typeof _syncNotify !== 'function' || typeof _delayNotify !== 'function' ) {
 		console.log('Evil client');
 		return false;
 	}
 
-	// Apply Notify
-	this.now.notify = _notify;
+	// Apply Notifies
+	this.now.syncNotify = _syncNotify;
+	this.now.delayNotify = _delayNotify;
 
 	// Next
-	_callback(this.now.id);
+	_callback(this.now.id,nowpadServer.delay);
+};
+
+/**
+ * Change the delay
+ */
+everyone.now.delayChange = function(_delay){
+	// Handle
+	nowpadServer.delay = _delay;
+
+	// Notify
+	everyone.now.delayNotify(_delay);
 };
 
 /**
@@ -195,8 +209,8 @@ everyone.now.sync = function(_state,_patch,_callback){
 	// Return Patches
 	_callback(states,n);
 
-	// Notify
+	// Sync Notify
 	if ( _patch ) {
-		everyone.now.notify(n);
+		everyone.now.syncNotify(n);
 	}
 };

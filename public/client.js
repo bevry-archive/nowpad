@@ -45,7 +45,7 @@
 				window.now.ready(function(){
 					// Bind Now
 					window.now.meet(
-						// Notify
+						// Sync Notify
 						function(_state){
 							// We've received a change
 							if ( _state !== me.lastSyncedState ) {
@@ -53,10 +53,22 @@
 								me.reset();
 							}
 						},
+						// Delay Notify
+						function(_delay){
+							// We've received a delay change
+							if ( me.timerDelay !== _delay ) {
+								me.timerDelay = _delay;
+								alert('Sync delay changed to: '+_delay+'ms');
+							}
+						},
 						// Callback
-						function(_id){
+						function(_id,_delay){
 							// Apply Id
 							document.title = me.id = _id;
+
+							// Apply Delay
+							me.timerDelay = _delay;
+							alert('Initialised with a sync delay of: '+_delay+'ms');
 
 							// Init Sync
 							me.reset();
@@ -81,9 +93,27 @@
 				this.$doc = $('#doc');
 				this.doc = this.$doc.get(0);
 
-				// Events
+				// Keyup
 				me.$doc.keyup(function(){
 					me.reset();
+				});
+
+				// Delay Toggles
+				$('#delayIncrease').click(function(){
+					if ( me.timerDelay <= 3050 ) {
+						window.now.delayChange(me.timerDelay + 500);
+					}
+					else {
+						alert('Already at the max delay of: '+me.timerDelay);
+					}
+				});
+				$('#delayDecrease').click(function(){
+					if ( me.timerDelay >= 550 ) {
+						window.now.delayChange(me.timerDelay - 500);
+					}
+					else {
+						alert('Already at the min delay of: '+me.timerDelay);
+					}
 				});
 			},
 
