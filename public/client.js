@@ -234,6 +234,7 @@
 
 				// Apply Synced Patches
 				for ( i=0; i<newSyncedPatches.length; ++i ) {
+					console.log('remote');
 					// Apply Patch
 					patch = newSyncedPatches[i];
 					newSyncedValue = this.apply(patch,newSyncedValue);
@@ -241,6 +242,7 @@
 
 				// Compare Local Changes
 				if ( lastCurrentValue !== newCurrentValue ) {
+					console.log('local');
 					// Generate and Apply the Patch to Synced Changes
 					patch = nowpadCommon.createPatch(lastCurrentValue, newCurrentValue);
 					newCurrentValue = this.apply(patch,newSyncedValue);
@@ -252,6 +254,8 @@
 
 				// Has Changes?
 				if ( this.doc.value !== newCurrentValue ) {
+					console.log('updating');
+
 					// Apply Changes
 					this.doc.value = newCurrentValue;
 
@@ -281,7 +285,7 @@
 
 				// Sync and Apply Cursor
 				if ( _value !== patchValue ) {
-					console.log('[\n'+this.doc.value+'\n][\n'+_value+'\n][\n'+patchValue+'\n]');
+					console.log('updating cursor: ', this.selectionStart, 'to', patchResult.selectionStart);
 					this.selectionStart = patchResult.selectionStart;
 					this.selectionEnd = patchResult.selectionEnd;
 				}
