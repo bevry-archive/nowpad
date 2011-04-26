@@ -179,7 +179,7 @@
 									me.reset();
 								}
 								else {
-									me.sync(_patches.length === 1 && _patches[0] === patch);
+									me.sync();
 								}
 							}
 
@@ -209,7 +209,7 @@
 			/**
 			 * Apply the Client and Server Changes
 			 */
-			sync: function(_ignoreCursor){
+			sync: function(){
 				// Prepare
 				var
 					i, patch,
@@ -228,38 +228,33 @@
 					return false;
 				}
 
-				// Cursor?
-				if ( _ignoreCursor ) {
-					// Get Cursor Positions
-					this.selectionStart = this.doc.selectionStart;
-					this.selectionEnd = this.doc.selectionEnd;
-				}
+				// Get Cursor Positions
+				this.selectionStart = this.doc.selectionStart;
+				this.selectionEnd = this.doc.selectionEnd;
 
 				// Apply Synced Patches
 				for ( i=0; i<newSyncedPatches.length; ++i ) {
-					console.log('remote');
 					// Apply Patch
 					patch = newSyncedPatches[i];
-					newSyncedValue = this.apply(patch,newSyncedValue,_ignoreCursor);
+					newSyncedValue = this.apply(patch,newSyncedValue);
 				}
 
 				// Compare Local Changes
 				if ( lastCurrentValue !== newCurrentValue ) {
-					console.log('local');
 					// Generate and Apply the Patch to Synced Changes
 					patch = nowpadCommon.createPatch(lastCurrentValue, newCurrentValue);
-					newCurrentValue = this.apply(patch,newSyncedValue,true);
+					newCurrentValue = this.apply(patch,newSyncedValue);
 				}
 				else {
 					// Apply Synced Changes
 					newCurrentValue = newSyncedValue;
 				}
 
-				// Apply Local Changes
-				this.doc.value = newCurrentValue;
+				// Has Changes?
+				if ( this.doc.value !== newCurrentValue ) {
+					// Apply Changes
+					this.doc.value = newCurrentValue;
 
-				// Cursor?
-				if ( _ignoreCursor ) {
 					// Update Cursor
 					this.doc.selectionStart = this.selectionStart;
 					this.doc.selectionEnd = this.selectionEnd;
@@ -276,7 +271,7 @@
 			/**
 			 * Apply a patch to our state
 			 */
-			apply: function(_patch,_value,_ignoreCursor){
+			apply: function(_patch,_value){
 				// Prepare
 				var patchResult, patchValue;
 
@@ -285,8 +280,8 @@
 				patchValue = patchResult.value;
 
 				// Sync and Apply Cursor
-				if ( !_ignoreCursor && _value !== patchValue && this.doc.value !== patchValue && this.doc.value !== _value ) {
-					console.log('['+this.doc.value+']['+_value+']\n['+patchValue+']');
+				if ( _value !== patchValue ) {
+					console.log('[\n'+this.doc.value+'\n][\n'+_value+'\n][\n'+patchValue+'\n]');
 					this.selectionStart = patchResult.selectionStart;
 					this.selectionEnd = patchResult.selectionEnd;
 				}
