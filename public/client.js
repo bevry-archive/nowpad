@@ -234,20 +234,20 @@
 
 				// Apply Synced Patches
 				for ( i=0; i<newSyncedStates.length; ++i ) {
-					console.log('remote');
 					// Apply Patch
 					state = newSyncedStates[i];
+					console.log('remote:', state);
 					newSyncedValue = this.apply(state,newSyncedValue);
 				}
 
 				// Compare Local Changes
 				if ( lastCurrentValue !== newCurrentValue ) {
-					console.log('local');
 					// Generate and Apply the Patch to Synced Changes
 					state = {
 						patch: nowpadCommon.createPatch(lastCurrentValue, newCurrentValue),
 						client: this.id
 					};
+					console.log('local:', state);
 					newCurrentValue = this.apply(state,newSyncedValue);
 				}
 				else {
