@@ -34,7 +34,14 @@ console.log("Express server listening on port %d", app.address().port);
 // Now
 var
 	everyone = now.initialize(app, {clientWrite: false}),
-	value = '', states = [], locked = false, clientCount = 0, clients = {};
+	nowpadServer = {
+		// Variables
+		value: '',
+		states: [],
+		locked: false,
+		clientCount: 0,
+		clients: {}
+	};
 
 /**
  * Setup a new client
@@ -44,19 +51,19 @@ everyone.connected(function(){
 	var id;
 	while ( true ) {
 		id = String(Math.floor(Math.random()*1000));
-		if ( typeof clients[id] === 'undefined' ) {
+		if ( typeof nowpadServer.clients[id] === 'undefined' ) {
 			break;
 		}
 	}
 	this.now.id = id;
 
 	// Setup Client Information
-	this.now.info = clients[id] = {
+	this.now.info = nowpadServer.clients[id] = {
 		id: id
 	};
 
 	// Increment Count
-	++clients;
+	++nowpadServer.clientCount;
 
 	// Log
 	console.log("Joined:", this.now.id);
@@ -67,10 +74,10 @@ everyone.connected(function(){
  */
 everyone.disconnected(function(){
 	// Delete Client Information
-	delete clients[this.now.id];
+	delete nowpadServer.clients[this.now.id];
 
 	// Decrement Count
-	--clients;
+	--nowpadServer.clientCount;
 
 	// Log
 	console.log("Left:", this.now.id);
@@ -103,9 +110,9 @@ everyone.now.lock = function(_callback){
 	var result = false;
 
 	// Check
-	if ( !locked ) {
+	if ( !nowpadServer.locked ) {
 		// Lock
-		locked = this.now.id;
+		this.locked = this.now.id;
 
 		// Log
 		// console.log('Locked:', this.now.id);
@@ -123,7 +130,7 @@ everyone.now.lock = function(_callback){
  */
 everyone.now.unlock = function(){
 	// Unlock
-	locked = false;
+	this.locked = false;
 
 	// Log
 	// console.log('Unlocked:', this.now.id);
@@ -134,9 +141,9 @@ everyone.now.unlock = function(){
  */
 everyone.now.log = function(){
 	console.log({
-		lock: locked,
-		clientCount: clientCount,
-		clients: clients
+		lock: this.locked,
+		clientCount: nowpadServer.clientCount,
+		clients: nowpadServer.clients
 	});
 };
 
@@ -145,7 +152,7 @@ everyone.now.log = function(){
  */
 everyone.now.sync = function(_state,_patch,_callback){
 	// Prepare
-	var result, patches = [], i, n = states.length;
+	var result, states = [], i, n = nowpadServer.states.length, state;
 
 	// Log
 	console.log('Sync:', this.now.id);
@@ -157,7 +164,7 @@ everyone.now.sync = function(_state,_patch,_callback){
 
 		// Add Prior Patches
 		for ( i=_state||0; i<n; ++i ) {
-			patches.push(states[i]);
+			states.push(nowpadServer.states[i]);
 		}
 	}
 
@@ -166,21 +173,27 @@ everyone.now.sync = function(_state,_patch,_callback){
 		// We have a difference
 		console.log('Received Patch:', this.now.id, 'from', _state, 'to', n+1, 'patch:', _patch);
 
+		// Create State
+		state = {
+			patch: _patch,
+			client: this.now.id
+		};
+
 		// Add Patch
-		patches.push(_patch);
-		states.push(_patch);
+		states.push(state);
+		nowpadServer.states.push(state);
 		++n;
 
 		// Apply Patch
-		result = nowpadCommon.applyPatch(_patch,value);
-		value = result.value;
+		result = nowpadCommon.applyPatch(_patch,nowpadServer.value);
+		nowpadServer.value = result.value;
 
 		// Log
 		// console.log(value);
 	}
 
 	// Return Patches
-	_callback(patches,n);
+	_callback(states,n);
 
 	// Notify
 	if ( _patch ) {

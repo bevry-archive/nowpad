@@ -18,7 +18,7 @@
 			lastCurrentValue: '',
 			lastSyncedState: false,
 			newSyncedState: false,
-			newSyncedPatches: [],
+			newSyncedStates: [],
 			selectionStart: 0,
 			selectionEnd: 0,
 
@@ -161,17 +161,17 @@
 						// console.log('Sync send: ['+me.lastSyncedState+'] ['+patch+'] ['+me.lastSyncedValue+'] ['+me.lastCurrentValue+']');
 
 						// Synchronise
-						window.now.sync(me.lastSyncedState, patch, function(_patches,_state){
+						window.now.sync(me.lastSyncedState, patch, function(_states,_state){
 							// Log
 							// console.log('Sync receive:',_patches,_state,this.lastSyncedState,_state);
 
 							// Updates?
-							if ( _patches.length ) {
+							if ( _states.length ) {
 								// Log
 								// console.log('Applying', _patches, _state);
 
 								// Synchronise
-								me.newSyncedPatches = _patches;
+								me.newSyncedStates = _states;
 								me.newSyncedState = _state;
 
 								// Apply the Changes when the user has stopped typing
@@ -212,18 +212,18 @@
 			sync: function(){
 				// Prepare
 				var
-					i, patch,
+					i, state,
 					// Local Values
 					lastCurrentValue = this.lastCurrentValue,
 					newCurrentValue = this.doc.value,
 					// Synced Values
 					lastSyncedState = this.lastSyncedState,
-					newSyncedPatches = this.newSyncedPatches,
+					newSyncedStates = this.newSyncedStates,
 					newSyncedState = this.newSyncedState,
 					newSyncedValue = this.lastSyncedValue;
 
 				// Check if we have something to do
-				if ( !newSyncedPatches.length ) {
+				if ( !newSyncedStates.length ) {
 					// Nothing to do
 					return false;
 				}
@@ -233,19 +233,22 @@
 				this.selectionEnd = this.doc.selectionEnd;
 
 				// Apply Synced Patches
-				for ( i=0; i<newSyncedPatches.length; ++i ) {
+				for ( i=0; i<newSyncedStates.length; ++i ) {
 					console.log('remote');
 					// Apply Patch
-					patch = newSyncedPatches[i];
-					newSyncedValue = this.apply(patch,newSyncedValue);
+					state = newSyncedStates[i];
+					newSyncedValue = this.apply(state,newSyncedValue);
 				}
 
 				// Compare Local Changes
 				if ( lastCurrentValue !== newCurrentValue ) {
 					console.log('local');
 					// Generate and Apply the Patch to Synced Changes
-					patch = nowpadCommon.createPatch(lastCurrentValue, newCurrentValue);
-					newCurrentValue = this.apply(patch,newSyncedValue);
+					state = {
+						patch: nowpadCommon.createPatch(lastCurrentValue, newCurrentValue),
+						client: this.id
+					};
+					newCurrentValue = this.apply(state,newSyncedValue);
 				}
 				else {
 					// Apply Synced Changes
@@ -265,7 +268,7 @@
 				}
 
 				// Apply Sync Changes
-				this.newSyncedPatches = [];
+				this.newSyncedStates = [];
 				this.newSyncedState = false;
 				this.lastSyncedState = newSyncedState;
 				this.lastSyncedValue = newSyncedValue;
@@ -275,16 +278,16 @@
 			/**
 			 * Apply a patch to our state
 			 */
-			apply: function(_patch,_value){
+			apply: function(_state,_value){
 				// Prepare
 				var patchResult, patchValue;
 
 				// Sync Value
-				patchResult = nowpadCommon.applyPatch(_patch,_value,this.selectionStart,this.selectionEnd);
+				patchResult = nowpadCommon.applyPatch(_state.patch,_value,this.selectionStart,this.selectionEnd);
 				patchValue = patchResult.value;
 
 				// Sync and Apply Cursor
-				if ( _value !== patchValue ) {
+				if ( _value !== patchValue && _state.client !== this.id ) {
 					console.log('updating cursor: ', this.selectionStart, 'to', patchResult.selectionStart);
 					this.selectionStart = patchResult.selectionStart;
 					this.selectionEnd = patchResult.selectionEnd;
