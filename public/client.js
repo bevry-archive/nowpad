@@ -278,7 +278,7 @@
 
 				// Sync and Apply Cursor
 				if ( _value !== patchValue && this.doc.value !== patchValue ) {
-					// console.log('['+this.doc.value+']['+_value+']\n['+patchValue+']');
+					console.log('['+this.doc.value+']['+_value+']\n['+patchValue+']');
 					this.selectionStart = patchResult.selectionStart;
 					this.selectionEnd = patchResult.selectionEnd;
 				}
