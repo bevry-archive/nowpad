@@ -248,7 +248,7 @@
 					console.log('local');
 					// Generate and Apply the Patch to Synced Changes
 					patch = nowpadCommon.createPatch(lastCurrentValue, newCurrentValue);
-					newCurrentValue = this.apply(patch,newSyncedValue,_ignoreCursor);
+					newCurrentValue = this.apply(patch,newSyncedValue,true);
 				}
 				else {
 					// Apply Synced Changes
