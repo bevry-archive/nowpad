@@ -257,7 +257,7 @@
 
 				// Has Changes?
 				if ( this.doc.value !== newCurrentValue ) {
-					console.log('updating');
+					console.log('applying cursor: ', this.doc.selectionStart, 'to', this.selectionStart);
 
 					// Apply Changes
 					this.doc.value = newCurrentValue;
