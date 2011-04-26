@@ -25,8 +25,9 @@
 			// Misc
 			id: null,
 			timer: false,
-			timerDelay: 1000,
+			timerDelay: 50,
 			isTyping: false,
+			inRequest: false,
 
 			/**
 			 * Initialise our Client
@@ -127,6 +128,13 @@
 					return false;
 				}
 
+				// Lock
+				if ( this.inRequest ) {
+					// Locked
+					return false;
+				}
+				this.inRequest = true;
+
 				// Update
 				this.sync();
 
@@ -150,17 +158,17 @@
 						patch = nowpadCommon.createPatch(me.lastSyncedValue, me.lastCurrentValue);
 
 						// Log
-						console.log('Sync send: ['+me.lastSyncedState+'] ['+patch+'] ['+me.lastSyncedValue+'] ['+me.lastCurrentValue+']');
+						// console.log('Sync send: ['+me.lastSyncedState+'] ['+patch+'] ['+me.lastSyncedValue+'] ['+me.lastCurrentValue+']');
 
 						// Synchronise
 						window.now.sync(me.lastSyncedState, patch, function(_patches,_state){
 							// Log
-							console.log('Sync receive:',_patches,_state,this.lastSyncedState,_state);
+							// console.log('Sync receive:',_patches,_state,this.lastSyncedState,_state);
 
 							// Updates?
 							if ( _patches.length ) {
 								// Log
-								console.log('Applying', _patches, _state);
+								// console.log('Applying', _patches, _state);
 
 								// Synchronise
 								me.newSyncedPatches = _patches;
@@ -180,6 +188,7 @@
 
 							// Feedback
 							me.$doc.removeClass('syncing');
+							me.inRequest = false;
 						});
 					}
 					// Fail
@@ -189,6 +198,7 @@
 
 						// Feedback
 						me.$doc.removeClass('syncing');
+						me.inRequest = false;
 
 						// Try Again Later
 						me.reset();
@@ -207,6 +217,7 @@
 					lastCurrentValue = this.lastCurrentValue,
 					newCurrentValue = this.doc.value,
 					// Synced Values
+					lastSyncedState = this.lastSyncedState,
 					newSyncedPatches = this.newSyncedPatches,
 					newSyncedState = this.newSyncedState,
 					newSyncedValue = this.lastSyncedValue;
@@ -228,13 +239,6 @@
 					newSyncedValue = this.apply(patch,newSyncedValue);
 				}
 
-				// Apply Sync Changes
-				this.newSyncedPatches = [];
-				this.newSyncedState = false;
-				this.lastSyncedState = newSyncedState;
-				this.lastSyncedValue = newSyncedValue;
-				this.lastCurrentValue = newSyncedValue;
-
 				// Compare Local Changes
 				if ( lastCurrentValue !== newCurrentValue ) {
 					// Generate and Apply the Patch to Synced Changes
@@ -252,6 +256,13 @@
 				// Update Cursor
 				this.doc.selectionStart = this.selectionStart;
 				this.doc.selectionEnd = this.selectionEnd;
+
+				// Apply Sync Changes
+				this.newSyncedPatches = [];
+				this.newSyncedState = false;
+				this.lastSyncedState = newSyncedState;
+				this.lastSyncedValue = newSyncedValue;
+				this.lastCurrentValue = newSyncedValue;
 			},
 
 			/**
@@ -266,7 +277,8 @@
 				patchValue = patchResult.value;
 
 				// Sync and Apply Cursor
-				if ( _value !== patchValue ) {
+				if ( _value !== patchValue && this.doc.value !== patchValue ) {
+					// console.log('['+this.doc.value+']['+_value+']\n['+patchValue+']');
 					this.selectionStart = patchResult.selectionStart;
 					this.selectionEnd = patchResult.selectionEnd;
 				}

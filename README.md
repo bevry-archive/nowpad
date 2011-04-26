@@ -26,6 +26,9 @@
 
 ## History
 
+- v0.6
+	- Greatly improved performance
+
 - v0.5
 	- Ignores internet explorer and console less browsers
 	- Now will only apply syncs once the user has finished typing

@@ -55,7 +55,8 @@
 					// Start
 					mod = patch.length2 - patch.length1;
 
-					console.log(patch,selectionStart,selectionEnd,start,mod);
+					// Log
+					// console.log(patch,selectionStart,selectionEnd,start,mod);
 
 					// Adjust
 					if ( start < selectionStart ) {
