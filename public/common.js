@@ -41,24 +41,39 @@
 				for ( i=0; i<patches.length; ++i ) {
 					// Fetch
 					patch = patches[i];
-					start = patch.start1;
+					start = null;
+					mod = 0;
 
 					// Handle
 					for ( ii=0; ii<patch.diffs.length; ++ii ) {
 						diff = patch.diffs[ii];
-						if ( diff[0] !== 0 ) {
-							break;
+						switch ( diff[0] ) {
+							case -1:
+								mod -= diff[1].length;
+								break;
+							case 0:
+								if ( start === null ) {
+									start = diff[1].length;
+								}
+								break;
+							case 1:
+								mod += diff[1].length;
+								break;
 						}
-						start += diff[1].length;
 					}
 
-					// Start
-					mod = patch.length2 - patch.length1;
+					// Adjust
+					if ( start === null ) {
+						start = patch.start1;
+					}
+					else {
+						start += patch.start1;
+					}
 
 					// Log
 					// console.log(patch,selectionStart,selectionEnd,start,mod);
 
-					// Adjust
+					// Apply
 					if ( start < selectionStart ) {
 						selectionStart += mod;
 					}
