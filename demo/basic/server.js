@@ -10,7 +10,7 @@ var
 app.configure(function(){
 	// Standard
 	app.use(express.methodOverride());
-  app.use(express.errorHandler());
+	app.use(express.errorHandler());
 
   // Routing
 	app.use(app.router);

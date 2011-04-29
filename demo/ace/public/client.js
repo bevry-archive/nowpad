@@ -16,6 +16,7 @@
 				$(function(){
 					// ACE
     			this.editor = ace.edit('pad');
+					this.editor.setShowPrintMargin(false);
 
 					// Nowpad
 					this.nowpad = new nowpadClient({
