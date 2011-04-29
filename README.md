@@ -39,12 +39,26 @@
 
 - Client Side
 
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-		<script src="/nowjs/now.js"></script>
-		<script src="/nowpad/nowpad.js"></script>
-		<script>
-			$textarea = $('#textarea').nowpad();
-		</script>
+	- Include Dependencies
+
+			<script src="/nowjs/now.js"></script>
+			<script src="/nowpad/nowpad.js"></script>
+
+	- Using NowPad with a Textarea
+
+			// Without jQuery
+			new nowpadClient({
+				pad: document.getElementById('myTextarea')
+			});
+
+			// Or With jQuery
+			$textarea = $('#myTextarea').nowpad();
+
+	- Using NowPad with ACE
+
+			new nowpadClient({
+				pad: ace.edit('pad')
+			});
 
 
 ## Features
