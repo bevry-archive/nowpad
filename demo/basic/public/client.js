@@ -11,8 +11,8 @@
 			init: function(){
 				// DomReady
 				$(function(){
-					// Elements
-					$textarea = $('#textarea').nowpad();
+					// Nowpadify
+					$('#pad').nowpad();
 				});
 			}
 		};

@@ -1,10 +1,10 @@
-// Require
+// Prepare
 var
+	// Require
 	express = require('express'),
-	nowpad = require("nowpad");
-
-// Server
-var app = express.createServer();
+	nowpad = require("nowpad"),
+	// Server
+	app = express.createServer();
 
 // Configuration
 app.configure(function(){

@@ -15,7 +15,13 @@
 
 ## Demo
 
-	nowpad basic # http://localhost:9572/
+- Basic single textarea demo
+
+		nowpad basic # http://localhost:9572/
+
+- [ACE Code Editor](http://ace.ajax.org/) demo
+
+		nowpad ace # http://localhost:9572/
 
 
 ## Usage
@@ -58,7 +64,10 @@
 
 ## History
 
-- v0.7
+- v0.8 April 29, 2011
+	- Nowpad now works with ACE and TextAreas
+
+- v0.7 April 29, 2011
 	- Nowpad is now a npm package
 
 - v0.6
