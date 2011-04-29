@@ -3,16 +3,24 @@
 	var
 		// Globals
 		jQuery = window.jQuery, $ = jQuery,
+		nowpadClient = window.nowpadClient,
 		// Client
-		Client = {
+		Client = window.Client = {
 			// Elements
+			nowpad: null,
 
 			// Initialise
 			init: function(){
+				// Prepare
+				var me = this;
+
 				// DomReady
 				$(function(){
 					// Nowpadify
-					$('#pad').nowpad();
+					me.nowpad = new nowpadClient({
+						pad: $('#pad')
+					});
+					// $('#pad').nowpad();
 				});
 			}
 		};

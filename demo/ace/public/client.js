@@ -5,22 +5,25 @@
 		jQuery = window.jQuery, $ = jQuery,
 		nowpadClient = window.nowpadClient,
 		// Client
-		Client = {
+		Client = window.Client = {
 			// Vars
 			editor: null,
 			nowpad: null,
 
 			// Initialise
 			init: function(){
+				// Prepare
+				var me = this;
+
 				// DomReady
 				$(function(){
 					// ACE
-    			this.editor = ace.edit('pad');
-					this.editor.setShowPrintMargin(false);
+    			me.editor = ace.edit('pad');
+					me.editor.setShowPrintMargin(false);
 
 					// Nowpad
-					this.nowpad = new nowpadClient({
-						pad: this.editor
+					me.nowpad = new nowpadClient({
+						pad: me.editor
 					});
 				});
 			}
