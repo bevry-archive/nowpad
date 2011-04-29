@@ -2,7 +2,7 @@
 var
 	// Require
 	express = require('express'),
-	nowpad = require("nowpad"),
+	nowpad = require(__dirname+'/../../lib/main.js'),
 	// Server
 	app = express.createServer();
 
