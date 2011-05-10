@@ -1,19 +1,31 @@
 # NowPad: Realtime Text Collaboration
 
+NowPad adds realtime text collaboration to parts of your website such as textareas, allowing multiple people to work on the same document at the same time (while seeing each others changes as they are applied). The benefit of this over traditional collaborative editing is two people would be editing the same document, they've both made changes, one person saves, and the other has to make the choice "lose my changes, or lose his changes". Nowpad keeps and applies both your changes as they happen.
 
-## Uses
+
+## It Uses
 
 * [Node.js](http://nodejs.org) - Server Side Javascript
 * [Express.js](http://expressjs.com/) - The "Server" in Server Side Javascript
 * [Now.js](http://nowjs.com/) - Server and Client Side Communication
 
 
-## Install
+## Trying
 
-	npm install nowpad
+[You can try it right now online with no installation right here](http://nowpad.nodester.com)
 
 
-## Demo
+## Installing
+
+
+1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
+
+2. Install NowPad
+
+		npm -g install nowpad
+
+
+## Running Installed Demos
 
 - Basic single textarea demo
 
@@ -24,7 +36,7 @@
 		nowpad ace # http://localhost:9572/
 
 
-## Usage
+## Implementing
 
 - Server Side
 
@@ -61,19 +73,9 @@
 			});
 
 
-## Features
+## Learning
 
-* Sync the same textarea between multiple clients
-* Keep the cursor positions intact
-* Only the difference is sent between clients
-* Data will always remain intact between clients (it will never get corrupted)
-* Potential to work with HTML as well as Text
-* Plug and play with the node.js package
-
-
-## Todo
-
-[The roadmap lays here](https://github.com/balupton/nowpad/wiki/Roadmap)
+[You can find the roadmap here](https://github.com/balupton/nowpad/wiki/Roadmap)
 
 
 ## History

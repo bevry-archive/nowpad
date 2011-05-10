@@ -12,11 +12,11 @@ app.configure(function(){
 	app.use(express.methodOverride());
 	app.use(express.errorHandler());
 
-  // Routing
+	// Routing
 	app.use(app.router);
 	app.use(express.static(__dirname));
 
-  // Views
+	// Views
 	app.set('views', __dirname + '/views');
 	app.set('view engine', 'ejs');
 	app.use(express.bodyParser());
