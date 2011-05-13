@@ -8,6 +8,7 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 * [Node.js](http://nodejs.org) - Server Side Javascript
 * [Express.js](http://expressjs.com/) - The "Server" in Server Side Javascript
 * [Now.js](http://nowjs.com/) - Server and Client Side Communication
+* [CoffeeScript](http://jashkenas.github.com/coffee-script/) - JavaScript Made Easy
 
 
 ## Trying
@@ -39,38 +40,47 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 ## Implementing
 
 - Server Side
+	
+	``` javascript
+	// Include NowPad
+	require('coffee-script')
+	nowpad = require('nowpad');
 
-		// Include
-		nowpad = require("nowpad");
+	// Setup with your Express Server
+	nowpad.setup(app);
 
-		// Setup with your Express Server
-		nowpad.setup(app);
-
-		// Bind to Document Changes
-		nowpad.bind('sync',function(value){});
+	// Bind to Document Changes
+	nowpad.bind('sync',function(value){});
+	```
 
 - Client Side
 
 	- Include Dependencies
-
-			<script src="/nowjs/now.js"></script>
-			<script src="/nowpad/nowpad.js"></script>
+		
+		``` html
+		<script src="/nowjs/now.js"></script>
+		<script src="/nowpad/nowpad.js"></script>
+		```
 
 	- Using NowPad with a Textarea
 
-			// Without jQuery
-			new nowpadClient({
-				pad: document.getElementById('myTextarea')
-			});
+		``` javascript
+		// Without jQuery
+		new nowpadClient({
+			pad: document.getElementById('myTextarea')
+		});
 
-			// Or With jQuery
-			$textarea = $('#myTextarea').nowpad();
+		// Or With jQuery
+		$textarea = $('#myTextarea').nowpad();
+		```
 
 	- Using NowPad with ACE
-
-			new nowpadClient({
-				pad: ace.edit('pad')
-			});
+		
+		``` javascript
+		new nowpadClient({
+			pad: ace.edit('pad')
+		});
+		```
 
 
 ## Learning

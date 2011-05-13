@@ -3,7 +3,7 @@
 	var
 		// Globals
 		jQuery = window.jQuery, $ = jQuery,
-		nowpadClient = window.nowpadClient,
+		nowpad = window.nowpad,
 		// Client
 		Client = window.Client = {
 			// Vars
@@ -22,8 +22,9 @@
 					me.editor.setShowPrintMargin(false);
 
 					// Nowpad
-					me.nowpad = new nowpadClient({
-						pad: me.editor
+					nowpad.createInstance({
+						element: me.editor,
+						documentId: 'single'
 					});
 				});
 			}

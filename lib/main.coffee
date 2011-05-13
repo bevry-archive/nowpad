@@ -1,11 +1,59 @@
 # Require
 fs = require 'fs'
 now = require 'now'
-nowpadCommon = require(__dirname+'/public/common.js').nowpadCommon
+path = require 'path'
+coffee = require 'coffee-script'
+nowpadCommon = require(__dirname+'/public/common.coffee').nowpadCommon
 nowpad = {}
 
 # -------------------------------------
 # Classes
+
+class List
+	# Storage
+	items: {}
+	length: 0
+
+	# For each
+	forEach: (callback) ->
+		for item of @items
+			callback(item)
+
+	# Fetch an used id
+	generateId: ->
+		while true
+			id = String Math.floor Math.random()*1000
+			if typeof @items[id] is 'undefined'
+				break
+		return id
+	
+	# Add a new item to the list
+	add: (id,item) ->
+		@items[id] = item
+		@length++
+	
+	# Get an item from the list
+	get: (id) ->
+		return @items[id]
+	
+	# Set an item from the list
+	set: (id,item) ->
+		if typeof @items[id] is 'undefined'
+			throw new Error 'an item with the id of ['+id+'] does not exist'
+		@items[id] = item
+	
+	# Remove an item from the list
+	remove: (id) ->
+		item = @get id
+		delete @items[id]
+		@length--
+		return item
+	
+	# Destroy an item from the list
+	destroy: (id) ->
+		item = @get id
+		@remove id
+		item.destroy()
 
 class Client
 	# Required
@@ -32,7 +80,7 @@ class Client
 		# Destroy Documents
 		for documentId in documentIds
 			document = nowpad.documents.get(documentId)
-			if typeof document.clientIds[clientId] is not 'undefined'
+			if document and typeof document.clientIds[clientId] is not 'undefined'
 				delete document.clientIds[clientId]
 				if document.clientIds.length is 0
 					document.destroy()
@@ -75,7 +123,7 @@ class Document
 			@locked = false
 			success = true
 		
-		return sucess
+		return success
 	
 	# Destroy
 	destroy: ->
@@ -89,46 +137,13 @@ class Document
 		# Destroy Clients
 		for clientId in clientIds
 			client = nowpad.clients.get(clientId)
-			if typeof document.documentIds[documentId] is not 'undefined'
+			if client and typeof document.documentIds[documentId] is not 'undefined'
 				delete document.documentIds[documentId]
 				if client.documentIds.length is 0
 					client.destroy()
 		
 		# Log
 		console.log 'Destroyed Document', documentId
-
-class List
-	# Storage
-	items: {}
-	length: 0
-
-	# Fetch an used id
-	generateId: ->
-		while true
-			id = String Math.floor Math.random()*1000
-			if typeof @items[id] is 'undefined'
-				break
-		return id
-	
-	# Add a new item to the list
-	add: (id,value) ->
-		@items[id] = value
-		@length++
-	
-	# Get an item from the list
-	get: (id) ->
-		return @items[id]
-	
-	# Set an item from the list
-	set: (id,value) ->
-		if typeof @items[id] is 'undefined'
-			throw new Error 'an item with the id of ['+id+'] does not exist'
-		@items[id] = value
-	
-	# Remove an item fro the list
-	remove: (id) ->
-		delete @items[id]
-		@length--
 
 
 # -------------------------------------
@@ -141,8 +156,8 @@ nowpad =
 	filePath: __dirname
 	fileNames: [
 		'public/diff_match_patch.js'
-		'public/common.js'
-		'public/client.js'
+		'public/common.coffee'
+		'public/client.coffee'
 	]
 	fileString: ''
 
@@ -166,7 +181,10 @@ nowpad =
 			filePath = nowpad.filePath+'/'+value
 			fs.readFile filePath, 'utf8', (err,data) ->
 				throw err if err
-				nowpad.fileString += data
+				if path.extname(filePath) is '.coffee'
+					nowpad.fileString += coffee.compile(data)
+				else
+					nowpad.fileString += data
 	
 	# Server the client script
 	serveClientScript: (req,res) ->
@@ -207,14 +225,13 @@ nowpad =
 		everyone.disconnected ->
 			# Fetch
 			clientId = @now.clientId
-			client = nowpad.clients.remove @now.clientId
-			client.destroy()
+			nowpad.clients.destroy @now.clientId
 
 			# Log
 			console.log 'Bye Client:', clientId
 		
 		# A client is shaking hands with the server
-		everyone.now.init = (syncNotify,delayNotify,callback) ->
+		everyone.now.handshake = (syncNotify,delayNotify,callback) ->
 			# Check the user isn't evil
 			if (typeof syncNotify isnt 'function') or (typeof delayNotify isnt 'function')
 				console.log 'Evil client'
@@ -223,22 +240,31 @@ nowpad =
 			# Apply the client-side functions used to notify the client to the now session
 			@now.syncNotify = syncNotify
 			@now.delayNotify = delayNotify
+
+			# Trigger the callback
+			if callback then callback()
 		
 		# Lock a document
 		everyone.now.lockDocument = (documentId, callback) ->
 			# Fetch Document
 			document = nowpad.documents.get documentId
+			unless document
+				document = new Document(documentId)
+				nowpad.documents.add(document)
 
 			# Attempt document lock and send result back to client
-			callback document.lock(@now.clientId)
+			if callback then callback document.lock(@now.clientId)
 		
 		# Unlock
-		everyone.now.unlockDocument = (callback) ->
+		everyone.now.unlockDocument = (documentId, callback) ->
 			# Fetch Document
 			document = nowpad.documents.get documentId
+			unless document
+				document = new Document(documentId)
+				nowpad.documents.add(document)
 
 			# Attempt document unlock and send result back to client
-			callback document.unlock(@now.clientId)
+			if callback then callback document.unlock(@now.clientId)
 		
 		# Log
 		everyone.now.log = ->
@@ -250,8 +276,11 @@ nowpad =
 		
 		# A document is preparing for sync
 		everyone.now.valueSyncDocument = (documentId, callback) ->
-			# Fetch Document
+			# Fetch document
 			document = nowpad.documents.get documentId
+			unless document
+				document = new Document(documentId)
+				nowpad.documents.add(document)
 			
 			# Fetch values
 			state = document.state
@@ -266,8 +295,13 @@ nowpad =
 		
 		# Sync
 		everyone.now.patchSyncDocument = (documentId,clientState,patch,callback) ->
-			# Prepare
+			# Fetch document
 			document = nowpad.documents.get documentId
+			unless document
+				document = new Document(documentId)
+				nowpad.documents.add(document)
+			
+			# Prepare
 			stateQueue = []
 			document.state = document.state || 0
 

@@ -43,21 +43,21 @@
 		"url" : "http://github.com/balupton/nowpad.git"
 	},
 	"dependencies": {
-	  "now": ">=0.5.2",
-	  "express": ">=2.2.2",
-	  "ejs": ">=0.4.1",
-	  "es5-shim": "1.0.0",
-    "socket.io": ">=0.6.1",
-    "node-proxy": ">=0.4.0"
+		"now": ">=0.5.2",
+		"express": ">=2.2.2",
+		"ejs": ">=0.4.1",
+		"es5-shim": "1.0.0",
+		"socket.io": ">=0.6.1",
+		"node-proxy": ">=0.4.0"
 	},
 	"engines" : {
 		"node": ">=0.4.0"
 	},
 	"bin": {
-		"nowpad": "./bin/nowpad.js"
+		"nowpad": "./bin/nowpad.coffee"
 	},
 	"directories": {
-    "lib": "lib"
-  },
-	"main": "./lib/main.js"
+		"lib": "lib"
+	},
+	"main": "./lib/main.coffee"
 }
