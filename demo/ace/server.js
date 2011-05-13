@@ -2,7 +2,8 @@
 var
 	// Require
 	express = require('express'),
-	nowpad = require(__dirname+'/../../lib/main.js'),
+	coffee = require('coffee-script'),
+	nowpad = require(__dirname+'/../../lib/main.coffee'),
 	// Server
 	app = express.createServer();
 
@@ -27,9 +28,9 @@ app.configure(function(){
 
 // Routes
 app.get('/', function(req, res){
-  res.render('doc', {locals: {
-    title: 'NowPad!'
-  }});
+	res.render('doc', {locals: {
+		title: 'NowPad!'
+	}});
 });
 
 // Init
@@ -37,6 +38,11 @@ app.listen(9572);
 console.log("Express server listening on port %d", app.address().port);
 
 // NowPad
-nowpad.bind('sync',function(value){
+nowpad.bind('sync',function(document,value){
 	// ...
+});
+
+// NowPad
+nowpad.bind('disconnected', function(document,value){
+	
 });
