@@ -3,51 +3,13 @@
 	$ = jQuery = window.jQuery
 	console = window.console
 	nowpadCommon = window.nowpadCommon
+	List = nowpadCommon.List
 
 	# Check Browser
 	if $.browser.msie or typeof console is 'undefined' or typeof console.log is 'undefined'
 		throw Error('Your browser is not supported yet')
-
+	
 	# Classes
-	class List
-		# Storage
-		items: {}
-		length: 0
-
-		# For each
-		forEach: (callback) ->
-			for item of @items
-				callback(item)
-
-		# Fetch an used id
-		generateId: ->
-			while true
-				id = String Math.floor Math.random()*1000
-				if typeof @items[id] is 'undefined'
-					break
-			return id
-		
-		# Add a new item to the list
-		add: (id,value) ->
-			@items[id] = value
-			@length++
-		
-		# Get an item from the list
-		get: (id) ->
-			return @items[id]
-		
-		# Set an item from the list
-		set: (id,value) ->
-			if typeof @items[id] is 'undefined'
-				throw new Error 'an item with the id of ['+id+'] does not exist'
-			@items[id] = value
-		
-		# Remove an item fro the list
-		remove: (id) ->
-			delete @items[id]
-			@length--
-
-
 	class Element
 		# Requirements
 		element: null
@@ -222,10 +184,13 @@
 
 			# Send off initial sync
 			window.now.valueSyncDocument @documentId, (state,value,delay) =>
+				@element.value value
+				@lastSyncedState = state
+				@timerDelay = delay
 			
 			# Bind to change event
 			@element.change =>
-				@timerReset()
+				@resetTimer()
 		
 		# Apply a patch to our state
 		applyPatch: (_state,_value) ->
@@ -325,9 +290,9 @@
 			@lastCurrentValue = newSyncedValue
 
 		# Timer Reset
-		timerReset: ->
+		resetTimer: ->
 			# Clear
-			@timerClear()
+			@clearTimer()
 			@isTyping = true
 
 			# Initialise
@@ -339,7 +304,7 @@
 			)
 		
 		# Timer Clear
-		timerClear: ->
+		clearTimer: ->
 			if @timer
 				window.clearTimeout @timer
 				@timer = false
@@ -390,6 +355,9 @@
 					timeoutInterval = window.setTimeout timeoutCallback, @timeoutDelay
 					window.now.patchSyncDocument @documentId, @lastSyncedState, patch, (_states,_state) =>
 						clearTimeout timeoutInterval
+
+						# Log
+						console.log 'Sync response: ', {_state,_states}
 
 						# Updates?
 						if _states.length isnt 0
@@ -450,9 +418,10 @@
 				window.now.handshake(
 					# Sync notify
 					(documentId, state) ->
+						console.log 'Sync notify called: ', documentId, state
 						nowpad.pads.forEach (pad) ->
 							if pad.documentId is documentId
-								pad.syncNotify delay
+								pad.syncNotify state
 					# Delay notify
 					(documentId, delay) ->
 						nowpad.pads.forEach (pad) ->

@@ -11,6 +11,57 @@
 	# Define
 	scope.nowpadCommon =
 		
+		# List
+		List: class
+			# Storage
+			items: {}
+			length: 0
+
+			# Constructor
+			constructor: ->
+				@items = {}
+
+			# For each
+			forEach: (callback) ->
+				for key,value of @items
+					callback value
+
+			# Fetch an used id
+			generateId: ->
+				while true
+					id = String Math.floor Math.random()*1000
+					if typeof @items[id] is 'undefined'
+						break
+				return id
+			
+			# Add a new item to the list
+			add: (item) ->
+				@items[item.id] = item
+				@length++
+			
+			# Get an item from the list
+			get: (id) ->
+				return @items[id]
+			
+			# Set an item from the list
+			set: (id,item) ->
+				if typeof @items[id] is 'undefined'
+					throw new Error 'an item with the id of ['+id+'] does not exist'
+				@items[id] = item
+			
+			# Remove an item from the list
+			remove: (id) ->
+				item = @get id
+				delete @items[id]
+				@length--
+				return item
+			
+			# Destroy an item from the list
+			destroy: (id) ->
+				item = @get id
+				@remove id
+				item.destroy()
+
 		# Create Patch
 		createPatch: (before,after) ->
 			patches = dmp.patch_make(before,after)

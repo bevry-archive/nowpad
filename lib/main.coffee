@@ -4,57 +4,11 @@ now = require 'now'
 path = require 'path'
 coffee = require 'coffee-script'
 nowpadCommon = require(__dirname+'/public/common.coffee').nowpadCommon
+List = nowpadCommon.List
 nowpad = {}
 
 # -------------------------------------
 # Classes
-
-class List
-	# Storage
-	items: {}
-	length: 0
-
-	# For each
-	forEach: (callback) ->
-		for item of @items
-			callback(item)
-
-	# Fetch an used id
-	generateId: ->
-		while true
-			id = String Math.floor Math.random()*1000
-			if typeof @items[id] is 'undefined'
-				break
-		return id
-	
-	# Add a new item to the list
-	add: (id,item) ->
-		@items[id] = item
-		@length++
-	
-	# Get an item from the list
-	get: (id) ->
-		return @items[id]
-	
-	# Set an item from the list
-	set: (id,item) ->
-		if typeof @items[id] is 'undefined'
-			throw new Error 'an item with the id of ['+id+'] does not exist'
-		@items[id] = item
-	
-	# Remove an item from the list
-	remove: (id) ->
-		item = @get id
-		delete @items[id]
-		@length--
-		return item
-	
-	# Destroy an item from the list
-	destroy: (id) ->
-		item = @get id
-		@remove id
-		item.destroy()
-
 class Client
 	# Required
 	id: null
@@ -66,7 +20,7 @@ class Client
 	# Constructor
 	constructor: (id,info) ->
 		@id = id
-		@info = info
+		@info = info || {}
 	
 	# Destroy
 	destroy: ->
@@ -112,6 +66,10 @@ class Document
 		if !@locked
 			@locked = clientId
 			success = true
+			console.log 'Client '+clientId+' locked the document '+@id
+		else
+			console.log 'Client '+clientId+' failed to lock the document '+@id
+			console.log 'it\'s currently locked by client '+@locked
 		
 		return success
 	
@@ -122,6 +80,10 @@ class Document
 		if @locked is clientId
 			@locked = false
 			success = true
+			console.log 'Client '+clientId+' unlocked the document '+@id
+		else
+			console.log 'Client '+clientId+' failed to unlock the document '+@id
+			console.log 'it\'s currently locked by client '+@locked
 		
 		return success
 	
@@ -145,6 +107,14 @@ class Document
 		# Log
 		console.log 'Destroyed Document', documentId
 
+class DocumentList extends List
+	# Get a document, or create it if it doesn't exist
+	get: (id) ->
+		document = super id
+		unless document
+			document = new Document(id)
+			nowpad.documents.add(document)
+		return document
 
 # -------------------------------------
 # Server
@@ -162,7 +132,7 @@ nowpad =
 	fileString: ''
 
 	# Nowpad
-	documents: new List(),
+	documents: new DocumentList(),
 	clients: new List(), 
 	
 	# Events
@@ -202,6 +172,14 @@ nowpad =
 		
 		# Now
 		nowpad.nowInit()
+	
+	# Log
+	log: ->
+		console.log(
+			clientClient: nowpad.clientCount
+			clients: nowpad.clients
+			documents: nowpad.documents
+		)
 	
 	# Initialise Now.js
 	nowInit: ->
@@ -248,39 +226,32 @@ nowpad =
 		everyone.now.lockDocument = (documentId, callback) ->
 			# Fetch Document
 			document = nowpad.documents.get documentId
-			unless document
-				document = new Document(documentId)
-				nowpad.documents.add(document)
 
-			# Attempt document lock and send result back to client
-			if callback then callback document.lock(@now.clientId)
+			# Attempt document lock
+			result = document.lock(@now.clientId)
+
+			# Send result back to client
+			if callback then callback result
 		
 		# Unlock
 		everyone.now.unlockDocument = (documentId, callback) ->
 			# Fetch Document
 			document = nowpad.documents.get documentId
-			unless document
-				document = new Document(documentId)
-				nowpad.documents.add(document)
 
-			# Attempt document unlock and send result back to client
-			if callback then callback document.unlock(@now.clientId)
+			# Attempt document unlock
+			result = document.unlock(@now.clientId)
+
+			# Send result back to client
+			if callback then callback result
 		
 		# Log
 		everyone.now.log = ->
-			console.log(
-				clientClient: nowpad.clientCount
-				clients: nowpad.clients
-				documents: nowpad.documents
-			)
+			nowpad.log()
 		
 		# A document is preparing for sync
 		everyone.now.valueSyncDocument = (documentId, callback) ->
 			# Fetch document
 			document = nowpad.documents.get documentId
-			unless document
-				document = new Document(documentId)
-				nowpad.documents.add(document)
 			
 			# Fetch values
 			state = document.state
@@ -297,21 +268,20 @@ nowpad =
 		everyone.now.patchSyncDocument = (documentId,clientState,patch,callback) ->
 			# Fetch document
 			document = nowpad.documents.get documentId
-			unless document
-				document = new Document(documentId)
-				nowpad.documents.add(document)
 			
 			# Prepare
 			stateQueue = []
 			document.state = document.state || 0
 
 			# Log
-			console.log 'Syncing', @now.clientId, 'for document', documentId
+			console.log '\nSyncing ['+@now.clientId+'/'+documentId+']'
+			console.log document
+			nowpad.log()
 
 			# Update Client
 			if clientState isnt document.state
 				# Requires Updates
-				console.log 'Syncing:', @now.clientId, 'from', clientState, 'to', nowpad.documentState
+				console.log 'Syncing from', clientState, 'to', document.state
 
 				# Add patches
 				stateQueue = document.states.slice clientState
@@ -338,13 +308,15 @@ nowpad =
 				result = nowpadCommon.applyPatch patch, document.value
 				document.value = result.value
 			
+			console.log ''
+			
 			# Return updates to client
 			callback(stateQueue,document.state)
 			
 			# Notify other clients
 			if patch
 				# Notify nowpad clients
-				everyone.now.syncNotify document.state
+				everyone.now.syncNotify document.id, document.state
 
 				# Notify application
 				nowpad.trigger 'sync', [document.id, document.value, document.state]
