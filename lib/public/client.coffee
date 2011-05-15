@@ -97,7 +97,7 @@
 						i = 0
 
 						# Calculate
-						while i < lines.length and i < range.end.row
+						while i < lines.length and i <= range.end.row
 							# Selection Start
 							if i is range.start.row
 								selectionStart += range.start.column;
@@ -283,7 +283,7 @@
 
 				# Apply cursor
 				console.log 'applying cursor:', @selectionRange
-				@element.selectionRange @selectionRange
+				@element.selectionRange @selectionRange, newCurrentValue
 			
 			# Apply ssync changes
 			@newSyncedStates = []
