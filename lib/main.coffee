@@ -221,15 +221,28 @@ nowpad =
 
 			# Trigger the callback
 			if callback then callback(@now.clientId)
-		
+	
+		# Create a timer to ensure locks don't last forever
+		lockTimer = false
+		lockTimerDelay = 1500
+
 		# Lock a document
 		everyone.now.lockDocument = (documentId, callback) ->
 			# Fetch Document
 			document = nowpad.documents.get documentId
 
 			# Attempt document lock
-			result = document.lock(@now.clientId)
+			result = document.lock @now.clientId
 
+			# If success, set a timeout
+			if result
+				lockTimerCallback = =>
+					clearTimeout lockTimer
+					lockTimer = false
+					console.log '\n!!! A lock has lasted too long... !!!\n'
+					document.unlock @now.clientId
+				lockTimer = setTimeout lockTimerCallback, lockTimerDelay
+			
 			# Send result back to client
 			if callback then callback result
 		
@@ -239,7 +252,11 @@ nowpad =
 			document = nowpad.documents.get documentId
 
 			# Attempt document unlock
-			result = document.unlock(@now.clientId)
+			result = document.unlock @now.clientId
+
+			# Clear timeout
+			clearTimeout lockTimer
+			lockTimer = false
 
 			# Send result back to client
 			if callback then callback result

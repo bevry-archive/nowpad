@@ -205,11 +205,15 @@
 
 			# Sync and Apply Cursor
 			if _value isnt patchValue and _state.clientId isnt nowpad.clientId
+				# Log
 				console.log 'updating cursor:',
 					range: @selectionRange
 					valuesDifferent: _value isnt patchValue
 					clientDifferent: _state.clientId isnt nowpad.clientId
+				# Apply
+				@selectionRange = patchResult.selectionRange
 			else
+				# Log
 				console.log 'ignored cursor:',
 					range: @selectionRange
 					valuesDifferent: _value isnt patchValue

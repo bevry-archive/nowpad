@@ -91,7 +91,7 @@
 				# Cycle through patches
 				for patch in patches
 					# Prepare
-					start = null
+					start = 0
 					mod = 0
 
 					# Handle
@@ -101,18 +101,26 @@
 								mod -= diff[1].length
 							when 1
 								mod += diff[1].length
+					
+					# Adjust
+					if patch.diffs[0][0] is 0
+						start = patch.diffs[0][1].length
+					start += patch.start1
+					
+					# Apply
+					if start < selectionRange.selectionStart
+						selectionRange.selectionStart += mod
+					if start < selectionRange.selectionStart or start < selectionRange.selectionEnd
+						selectionRange.selectionEnd += mod
 				
-				# Adjust
-				if patch.diffs[0][0] is 0
-					start = patch.diffs[0][1].length
-				start += patch.start1
+					# Log
+					console.log(
+						'selectionRange:',
+						[_selectionRange.selectionStart,_selectionRange.selectionEnd],
+						[selectionRange.selectionStart,selectionRange.selectionEnd],
+						[patch.start1,start,mod]
+					)
 
-				# Apply
-				if start < selectionRange.selectionStart
-					selectionRange.selectionStart += mod
-				if start < selectionRange.selectionStart or start < selectionRange.selectionEnd
-					selectionRange.selectionEnd += mod
-			
 			# Return
 			return {
 				pass: pass
