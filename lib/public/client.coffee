@@ -458,11 +458,11 @@
 	nowpad.init()
 	
 	# jQuery Extension
-	jQuery.fn.nowpad = ->
+	jQuery.fn.nowpad = (documentId) ->
 		$this = $(this)
 		nowpad.createInstance(
 			element: $this
-			documentId: $this.data('documentId') || 'empty'
+			documentId: documentId || $this.data('documentId') || 'empty'
 		)
 		return $this
 

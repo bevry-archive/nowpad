@@ -67,18 +67,20 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 		``` javascript
 		// Without jQuery
 		new nowpadClient({
-			pad: document.getElementById('myTextarea')
+			element: document.getElementById('myTextarea'),
+			documentId: 'doc1'
 		});
 
 		// Or With jQuery
-		$textarea = $('#myTextarea').nowpad();
+		$textarea = $('#myTextarea').nowpad('doc1');
 		```
 
 	- Using NowPad with ACE
 		
 		``` javascript
 		new nowpadClient({
-			pad: ace.edit('pad')
+			element: ace.edit('pad'),
+			documentId: 'doc1'
 		});
 		```
 
@@ -89,6 +91,10 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 
 
 ## History
+
+- v0.9 May 15, 2011
+	- Rewrote in CoffeeScript
+	- Added support for multiple pads, and mutliple documents
 
 - v0.8 April 29, 2011
 	- Nowpad now works with ACE and TextAreas
