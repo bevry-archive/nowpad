@@ -90,6 +90,11 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 [You can find the roadmap here](https://github.com/balupton/nowpad/wiki/Roadmap)
 
 
+## Known Issues
+
+1. v0.9 has introduced a cursor jump issue making typing with other people (or with lag??) very annoying
+
+
 ## History
 
 - v0.9 May 15, 2011
