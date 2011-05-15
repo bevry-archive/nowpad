@@ -50,16 +50,16 @@
 						@element.value
 		
 		# Selection Range
-		selectionRange: (value) ->
+		selectionRange: (selectionRange,content) ->
 			# Apply
-			if value?
+			if selectionRange?
 				switch @elementType
 					when 'ace'
 						# Calculate
 						session = @element.getSession()
-						value = value||session.getValue()
-						startString = value.substring(0,selectionRange.selectionStart)
-						endString = value.substring(0,selectionRange.selectionEnd)
+						content = content||session.getValue()
+						startString = content.substring(0,selectionRange.selectionStart)
+						endString = content.substring(0,selectionRange.selectionEnd)
 						startSplit = startString.split('\n')
 						endSplit = endString.split('\n')
 						startRow = if startSplit.length then startSplit.length-1 else 0
@@ -184,9 +184,10 @@
 
 			# Send off initial sync
 			window.now.valueSyncDocument @documentId, (state,value,delay) =>
-				@element.value value
+				@lastCurrentValue = @lastSyncedValue = value
 				@lastSyncedState = state
 				@timerDelay = delay
+				@element.value value
 			
 			# Bind to change event
 			@element.change =>
@@ -242,14 +243,16 @@
 			for state in newSyncedStates
 				# Apply Patch
 				console.log 'remote:', state
-				newSyncedValue = @.applyPatch state, newSyncedValue
+				newSyncedValue = @applyPatch state, newSyncedValue
 			
 			# Compare local changes
-			if (lastCurrentValue||'') isnt (newCurrentValue||'')
+			if lastCurrentValue && (lastCurrentValue isnt newCurrentValue)
 				# Generate and apply the patch to synced changes
 				state =
 					patch: nowpadCommon.createPatch lastCurrentValue||'', newCurrentValue
 					clientId: nowpad.clientId
+				console.log('local:', state);
+				newCurrentValue = @applyPatch(state,newSyncedValue);
 			else
 				# Apply synced changes
 				newCurrentValue = newSyncedValue
@@ -260,7 +263,7 @@
 				newSelectionRange = @element.selectionRange()
 
 				# Apply changes
-				@element.value newCurrentvalue
+				@element.value newCurrentValue
 
 				# Determine newest selection change
 				selectionStartDifference = (newSelectionRange.selectionStart-oldSelectionRange.selectionStart)
@@ -431,6 +434,7 @@
 					(clientId) ->
 						nowpad.clientId = clientId
 						nowpad.ready = true
+						document.title = clientId
 						for instance in nowpad.pendingInstances
 							nowpad.createInstance instance.config, instance.callback
 				)

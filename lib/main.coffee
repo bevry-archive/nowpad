@@ -220,7 +220,7 @@ nowpad =
 			@now.delayNotify = delayNotify
 
 			# Trigger the callback
-			if callback then callback()
+			if callback then callback(@now.clientId)
 		
 		# Lock a document
 		everyone.now.lockDocument = (documentId, callback) ->
@@ -298,7 +298,7 @@ nowpad =
 				State =
 					id: document.state
 					patch: patch
-					cleintId: @now.clientId
+					clientId: @now.clientId
 				
 				# Add
 				stateQueue.push State

@@ -2,7 +2,8 @@
 var
 	// Require
 	express = require('express'),
-	nowpad = require(__dirname+'/../../lib/main.js'),
+	coffee = require('coffee-script'),
+	nowpad = require(__dirname+'/../../lib/main.coffee'),
 	// Server
 	app = express.createServer();
 
