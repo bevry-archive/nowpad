@@ -19,6 +19,10 @@ class Client
 
 	# Constructor
 	constructor: (id,info) ->
+		# Reset
+		@documentIds = []
+
+		# Apply
 		@id = id
 		@info = info || {}
 	
@@ -57,6 +61,11 @@ class Document
 
 	# Constructor
 	constructor: (id) ->
+		# Reset
+		@states = []
+		@clientIds = []
+
+		# Apply
 		@id = id
 
 	# Lock
@@ -176,7 +185,6 @@ nowpad =
 	# Log
 	log: ->
 		console.log(
-			clientClient: nowpad.clientCount
 			clients: nowpad.clients
 			documents: nowpad.documents
 		)
@@ -293,16 +301,20 @@ nowpad =
 			# Log
 			console.log '\nSyncing ['+@now.clientId+'/'+documentId+']'
 			console.log document
-			nowpad.log()
+			console.log ''
 
 			# Update Client
 			if clientState isnt document.state
 				# Requires Updates
-				console.log 'Syncing from', clientState, 'to', document.state
 
 				# Add patches
 				stateQueue = document.states.slice clientState
-			
+				
+				# Log
+				console.log 'Syncing from', clientState, 'to', document.state
+				console.log stateQueue
+				console.log ''
+
 			# Update Server
 			if patch
 				# Update
@@ -310,6 +322,8 @@ nowpad =
 
 				# Log
 				console.log 'Received patch:', @now.clientId, 'from', clientState, 'to', document.state
+				console.log patch
+				console.log ''
 
 				# State
 				State =
@@ -324,9 +338,7 @@ nowpad =
 				# Apply
 				result = nowpadCommon.applyPatch patch, document.value
 				document.value = result.value
-			
-			console.log ''
-			
+
 			# Return updates to client
 			callback(stateQueue,document.state)
 			

@@ -1,7 +1,10 @@
 .sync {
 	color:red;
 }
-#pad {
+.pad {
+	margin:10px 0;
+}
+.pad,.editor {
 	width: 100%;
-	height: 800px;
+	height: 150px;
 }
