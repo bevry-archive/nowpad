@@ -66,7 +66,7 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 
 		``` javascript
 		// Without jQuery
-		new nowpadClient({
+		window.nowpad.createInstance({
 			element: document.getElementById('myTextarea'),
 			documentId: 'doc1'
 		});
@@ -78,7 +78,7 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 	- Using NowPad with ACE
 		
 		``` javascript
-		new nowpadClient({
+		window.nowpad.createInstance({
 			element: ace.edit('pad'),
 			documentId: 'doc1'
 		});
