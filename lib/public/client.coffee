@@ -192,109 +192,16 @@
 			# Bind to change event
 			@element.change =>
 				@resetTimer()
+
+		# Sync notify
+		syncNotify: (state) ->
+			if state isnt @lastSyncedState
+				@resetTimer()
 		
-		# Apply a patch to our state
-		applyPatch: (_state,_value) ->
-			# Sync Value
-			patchResult = nowpadCommon.applyPatch(
-				_state.patch
-				_value
-				@selectionRange
-			)
-			patchValue = patchResult.value
-
-			# Sync and Apply Cursor
-			if _value isnt patchValue and _state.clientId isnt nowpad.clientId
-				# Log
-				console.log 'updating cursor:',
-					range: @selectionRange
-					valuesDifferent: _value isnt patchValue
-					clientDifferent: _state.clientId isnt nowpad.clientId
-				# Apply
-				@selectionRange = patchResult.selectionRange
-			else
-				# Log
-				console.log 'ignored cursor:',
-					range: @selectionRange
-					valuesDifferent: _value isnt patchValue
-					clientDifferent: _state.clientId isnt nowpad.clientId
-			
-			# Done
-			return patchValue
-		
-		# Synchronise the value between the client and server
-		sync: ->
-			# Check if there is something to do
-			if @newSyncedStates.length is 0
-				return false
-			
-			# Local Values
-			lastCurrentValue = @lastcurrentValue
-			newCurrentValue = @element.value()
-
-			# Synced Values
-			lastSyncedState = @lastSyncedState
-			newSyncedStates = @newSyncedStates
-			newSyncedState = @newSyncedState
-			newSyncedValue = @lastSyncedValue
-
-			# Range
-			oldSelectionRange = #clone
-				selectionStart: @selectionRange.selectionStart
-				selectionEnd: @selectionRange.selectionEnd
-			
-			# Apply synced patches
-			for state in newSyncedStates
-				# Apply Patch
-				console.log 'remote:', state
-				newSyncedValue = @applyPatch state, newSyncedValue
-			
-			# Compare local changes
-			if lastCurrentValue && (lastCurrentValue isnt newCurrentValue)
-				# Generate and apply the patch to synced changes
-				state =
-					patch: nowpadCommon.createPatch lastCurrentValue||'', newCurrentValue
-					clientId: nowpad.clientId
-				console.log('local:', state);
-				newCurrentValue = @applyPatch(state,newSyncedValue);
-			else
-				# Apply synced changes
-				newCurrentValue = newSyncedValue
-			
-			# Has Changes?
-			if @element.value() isnt newCurrentValue
-				# Updated selection range
-				newSelectionRange = @element.selectionRange()
-
-				# Apply changes
-				@element.value newCurrentValue
-
-				# Determine newest selection change
-				selectionStartDifference = (newSelectionRange.selectionStart-oldSelectionRange.selectionStart)
-				selectionEndDifference = (newSelectionRange.selectionEnd-oldSelectionRange.selectionEnd)
-				
-				# Apply selection difference
-				@selectionRange.selectionStart += selectionStartDifference
-				@selectionRange.selectionEnd += selectionEndDifference
-
-				# Log
-				console.log(
-					[newSelectionRange.selectionStart,oldSelectionRange.selectionStart],
-					[newSelectionRange.selectionEnd,oldSelectionRange.selectionEnd],
-					[selectionStartDifference,selectionEndDifference],
-					[@selectionRange.selectionStart,@selectionRange.selectionEnd]
-				)
-
-				# Apply cursor
-				console.log 'applying cursor:', @selectionRange
-				@element.selectionRange @selectionRange, newCurrentValue
-			
-			# Apply ssync changes
-			@newSyncedStates = []
-			@newSyncedState = false
-			@lastSyncedState = newSyncedState
-			@lastSyncedValue = newSyncedValue
-			@lastCurrentValue = newSyncedValue
+		# Delay notify
+		delayNotify: (delay) ->
+			if delay isnt @timerDelay
+				@timerDelay = delay
 
 		# Timer Reset
 		resetTimer: ->
@@ -396,16 +303,109 @@
 					# Try again later
 					@resetTimer()
 		
-		# Sync notify
-		syncNotify: (state) ->
-			if state isnt @lastSyncedState
-				@resetTimer()
-		
-		# Delay notify
-		delayNotify: (delay) ->
-			if delay isnt @timerDelay
-				@timerDelay = delay
+		# Synchronise the value between the client and server
+		sync: ->
+			# Check if there is something to do
+			if @newSyncedStates.length is 0
+				return false
+			
+			# Local Values
+			lastCurrentValue = @lastCurrentValue
+			newCurrentValue = @element.value()
 
+			# Synced Values
+			lastSyncedState = @lastSyncedState
+			newSyncedStates = @newSyncedStates
+			newSyncedState = @newSyncedState
+			newSyncedValue = @lastSyncedValue
+
+			# Range
+			oldSelectionRange = #clone
+				selectionStart: @selectionRange.selectionStart
+				selectionEnd: @selectionRange.selectionEnd
+			
+			# Apply synced patches
+			for state in newSyncedStates
+				# Apply Patch
+				console.log 'remote:', state
+				newSyncedValue = @applyPatch state, newSyncedValue
+			
+			# Compare local changes
+			if lastCurrentValue && (lastCurrentValue isnt newCurrentValue)
+				# Generate and apply the patch to synced changes
+				state =
+					patch: nowpadCommon.createPatch lastCurrentValue||'', newCurrentValue
+					clientId: nowpad.clientId
+				console.log('local:', state);
+				newCurrentValue = @applyPatch(state,newSyncedValue);
+			else
+				# Apply synced changes
+				newCurrentValue = newSyncedValue
+			
+			# Has Changes?
+			if @element.value() isnt newCurrentValue
+				# Updated selection range
+				newSelectionRange = @element.selectionRange()
+
+				# Apply changes
+				@element.value newCurrentValue
+
+				# Determine newest selection change
+				selectionStartDifference = (newSelectionRange.selectionStart-oldSelectionRange.selectionStart)
+				selectionEndDifference = (newSelectionRange.selectionEnd-oldSelectionRange.selectionEnd)
+				
+				# Apply selection difference
+				@selectionRange.selectionStart += selectionStartDifference
+				@selectionRange.selectionEnd += selectionEndDifference
+
+				# Log
+				console.log(
+					[newSelectionRange.selectionStart,oldSelectionRange.selectionStart],
+					[newSelectionRange.selectionEnd,oldSelectionRange.selectionEnd],
+					[selectionStartDifference,selectionEndDifference],
+					[@selectionRange.selectionStart,@selectionRange.selectionEnd]
+				)
+
+				# Apply cursor
+				console.log 'applying cursor:', @selectionRange
+				@element.selectionRange @selectionRange, newCurrentValue
+			
+			# Apply ssync changes
+			@newSyncedStates = []
+			@newSyncedState = false
+			@lastSyncedState = newSyncedState
+			@lastSyncedValue = newSyncedValue
+			@lastCurrentValue = newSyncedValue
+		
+		# Apply a patch to our state
+		applyPatch: (_state,_value) ->
+			# Sync Value
+			patchResult = nowpadCommon.applyPatch(
+				_state.patch
+				_value
+				@selectionRange
+			)
+			patchValue = patchResult.value
+
+			# Sync and Apply Cursor
+			if _value isnt patchValue and _state.clientId isnt nowpad.clientId
+				# Log
+				console.log 'updating cursor:',
+					range: @selectionRange
+					valuesDifferent: _value isnt patchValue
+					clientDifferent: _state.clientId isnt nowpad.clientId
+				# Apply
+				@selectionRange = patchResult.selectionRange
+			else
+				# Log
+				console.log 'ignored cursor:',
+					range: @selectionRange
+					valuesDifferent: _value isnt patchValue
+					clientDifferent: _state.clientId isnt nowpad.clientId
+			
+			# Done
+			return patchValue
+		
 	# NowPad
 	nowpad = window.nowpad =
 		# Variables
