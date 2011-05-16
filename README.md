@@ -92,7 +92,7 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 
 ## Known Issues
 
-1. v0.9 has introduced a cursor jump issue making typing with other people (or with lag??) very annoying
+- None!
 
 
 ## History
@@ -107,23 +107,23 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 - v0.7 April 29, 2011
 	- Nowpad is now a npm package
 
-- v0.6
+- v0.6 April 26, 2011
 	- Greatly improved performance
 
-- v0.5
+- v0.5 April 26, 2011
 	- Ignores internet explorer and console less browsers
 	- Now will only apply syncs once the user has finished typing
 
-- v0.4
+- v0.4 April 25, 2011
 	- New algorithm which ensures data will never get corrupted
 
-- v0.3
+- v0.3 April 24, 2011
 	- Server now keeps a copy of the document
 
-- v0.2
+- v0.2 April 24, 2011
 	- Working on a type together basis with two people
 
-- v0.1
+- v0.1 April 24, 2011
 	- Working on a start and stop basis
 
 
