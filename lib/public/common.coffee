@@ -41,7 +41,11 @@
 			
 			# Get an item from the list
 			get: (id) ->
-				return @items[id]
+				return @items[id] || false
+			
+			# Does the item exist?
+			has: (id) ->
+				return @items[id]?
 			
 			# Set an item from the list
 			set: (id,item) ->
@@ -51,16 +55,22 @@
 			
 			# Remove an item from the list
 			remove: (id) ->
-				item = @get id
-				delete @items[id]
-				@length--
-				return item
+				if @has id
+					item = @get id
+					delete @items[id]
+					@length--
+					return item
+				else
+					return false
 			
 			# Destroy an item from the list
 			destroy: (id) ->
-				item = @get id
-				@remove id
-				item.destroy()
+				if @has id
+					item = @get id
+					@remove id
+					item.destroy()
+				else
+					return false
 
 		# Create Patch
 		createPatch: (before,after) ->

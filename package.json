@@ -1,6 +1,6 @@
 {
 	"name": "nowpad",
-	"version": "0.9.1",
+	"version": "0.10.0",
 	"description": "Realtime Text Collaboration",
 	"homepage": "https://github.com/balupton/nowpad",
 	"keywords": [
@@ -60,5 +60,5 @@
 	"directories": {
 		"lib": "lib"
 	},
-	"main": "./lib/main.coffee"
+	"main": "./lib/nowpad.coffee"
 }

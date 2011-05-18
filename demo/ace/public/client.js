@@ -21,9 +21,9 @@
 		}
 
 		// Create Pads
-		createInstance('pad1','pad1');
-		createInstance('pad2','pad1');
-		createInstance('pad3','pad3');
+		createInstance('pad1a','doc1');
+		createInstance('pad1b','doc1');
+		createInstance('pad2','doc2');
 	});
 
 

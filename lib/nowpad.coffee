@@ -9,6 +9,7 @@ nowpad = {}
 
 # -------------------------------------
 # Classes
+
 class Client
 	# Required
 	id: null
@@ -31,13 +32,16 @@ class Client
 		# Prepare
 		clientId = @id
 
+		# Remvoe
+		nowpad.clients.remove clientId
+
 		# Clear Documents
 		documentIds = @documentIds
 		@documentIds = []
 
 		# Destroy Documents
 		for documentId in documentIds
-			document = nowpad.documents.get(documentId)
+			document = nowpad.documents.get documentId
 			if document and typeof document.clientIds[clientId] is not 'undefined'
 				delete document.clientIds[clientId]
 				if document.clientIds.length is 0
@@ -60,13 +64,14 @@ class Document
 	clientIds: []
 
 	# Constructor
-	constructor: (id) ->
+	constructor: (id,value) ->
 		# Reset
 		@states = []
 		@clientIds = []
 
 		# Apply
 		@id = id
+		if value then @value = value
 
 	# Lock
 	lock: (clientId) ->
@@ -101,13 +106,16 @@ class Document
 		# Prepare
 		documentId = @id
 
+		# Remvoe
+		nowpad.clients.remove documentId
+
 		# Clear Clients
 		clientIds = @clientIds
 		@clientIds = []
 
 		# Destroy Clients
 		for clientId in clientIds
-			client = nowpad.clients.get(clientId)
+			client = nowpad.clients.get clientId
 			if client and typeof document.documentIds[documentId] is not 'undefined'
 				delete document.documentIds[documentId]
 				if client.documentIds.length is 0
@@ -118,12 +126,22 @@ class Document
 
 class DocumentList extends List
 	# Get a document, or create it if it doesn't exist
-	get: (id) ->
-		document = super id
-		unless document
-			document = new Document(id)
-			nowpad.documents.add(document)
-		return document
+	# next(err,document)
+	fetch: (id,next) ->
+		document = @get id
+		if document
+			next false, document
+		else if nowpad.requestHandler
+			nowpad.requestHandler id, =>
+				document = @get id
+				if document
+					next false, document
+				else
+					next Error 'Could not fetch the document '+id
+		else
+			document = new Document id
+			nowpad.documents.add document
+			next false, document
 
 # -------------------------------------
 # Server
@@ -141,8 +159,9 @@ nowpad =
 	fileString: ''
 
 	# Nowpad
-	documents: new DocumentList(),
-	clients: new List(), 
+	documents: new DocumentList()
+	clients: new List()
+	requestHandler: null
 	
 	# Events
 	events:
@@ -157,13 +176,13 @@ nowpad =
 	cacheClientScript: ->
 		nowpad.fileString = ''
 		nowpad.fileNames.forEach (value) ->
-			filePath = nowpad.filePath+'/'+value
-			fs.readFile filePath, 'utf8', (err,data) ->
+			fileFullPath = nowpad.filePath+'/'+value
+			fs.readFile fileFullPath, (err,data) ->
 				throw err if err
-				if path.extname(filePath) is '.coffee'
-					nowpad.fileString += coffee.compile(data)
+				if path.extname(fileFullPath) is '.coffee'
+					nowpad.fileString += coffee.compile(data.toString())
 				else
-					nowpad.fileString += data
+					nowpad.fileString += data.toString()
 	
 	# Server the client script
 	serveClientScript: (req,res) ->
@@ -172,15 +191,21 @@ nowpad =
 		res.end()
 	
 	# Setup
-	setup: (app) ->
-		# Bind
-		nowpad.app = app
+	setup: (app,everyone) ->
+		# Server
+		@app = app
+
+		# Everyone
+		if everyone
+			@everyone = everyone
+		else
+			@everyone = now.initialize @app, {clientWrite: false}
 
 		# Routes
-		nowpad.app.get '/nowpad/nowpad.js', nowpad.serveClientScript
+		@app.get '/nowpad/nowpad.js', @serveClientScript
 		
 		# Now
-		nowpad.nowInit()
+		@nowBind()
 	
 	# Log
 	log: ->
@@ -189,10 +214,27 @@ nowpad =
 			documents: nowpad.documents
 		)
 	
+	# Add document
+	addDocument: (documentId,value) ->
+		unless @documents.has documentId
+			document = new Document documentId, value
+			@documents.add document
+
+	# Delete document
+	delDocument: (documentId) ->
+		document = @documents.get documentId
+		if document
+			document.destroy()
+
+	# Request document
+	requestDocument: (requestHandler) ->
+		if @requestHandler
+			throw new Error 'Request handler already defined'
+		@requestHandler = requestHandler
+	
 	# Initialise Now.js
-	nowInit: ->
-		# Bind now to server
-		everyone = now.initialize nowpad.app, {clientWrite: false}
+	nowBind: ->
+		everyone = @everyone
 
 		# A client has connected
 		everyone.connected ->
@@ -217,15 +259,15 @@ nowpad =
 			console.log 'Bye Client:', clientId
 		
 		# A client is shaking hands with the server
-		everyone.now.handshake = (syncNotify,delayNotify,callback) ->
+		everyone.now.handshake = (notifySync,notifyDelay,callback) ->
 			# Check the user isn't evil
-			if (typeof syncNotify isnt 'function') or (typeof delayNotify isnt 'function')
+			if (typeof notifySync isnt 'function') or (typeof notifyDelay isnt 'function')
 				console.log 'Evil client'
 				return false
 			
 			# Apply the client-side functions used to notify the client to the now session
-			@now.syncNotify = syncNotify
-			@now.delayNotify = delayNotify
+			@now.notifySync = notifySync
+			@now.notifyDelay = notifyDelay
 
 			# Trigger the callback
 			if callback then callback(@now.clientId)
@@ -237,38 +279,46 @@ nowpad =
 		# Lock a document
 		everyone.now.lockDocument = (documentId, callback) ->
 			# Fetch Document
-			document = nowpad.documents.get documentId
+			nowpad.documents.fetch documentId, (err,document) =>
+				# Error
+				if err
+					console.log err
+					return
 
-			# Attempt document lock
-			result = document.lock @now.clientId
+				# Attempt document lock
+				result = document.lock @now.clientId
 
-			# If success, set a timeout
-			if result
-				lockTimerCallback = =>
-					clearTimeout lockTimer
-					lockTimer = false
-					console.log '\n!!! A lock has lasted too long... !!!\n'
-					document.unlock @now.clientId
-				lockTimer = setTimeout lockTimerCallback, lockTimerDelay
+				# If success, set a timeout
+				if result
+					lockTimerCallback = =>
+						clearTimeout lockTimer
+						lockTimer = false
+						console.log '\n!!! A lock has lasted too long... !!!\n'
+						document.unlock @now.clientId
+					lockTimer = setTimeout lockTimerCallback, lockTimerDelay
+				
+				# Send result back to client
+				if callback then callback result
 			
-			# Send result back to client
-			if callback then callback result
-		
 		# Unlock
 		everyone.now.unlockDocument = (documentId, callback) ->
 			# Fetch Document
-			document = nowpad.documents.get documentId
+			nowpad.documents.fetch documentId, (err,document) =>
+				# Error
+				if err
+					console.log err
+					return
 
-			# Attempt document unlock
-			result = document.unlock @now.clientId
+				# Attempt document unlock
+				result = document.unlock @now.clientId
 
-			# Clear timeout
-			clearTimeout lockTimer
-			lockTimer = false
+				# Clear timeout
+				clearTimeout lockTimer
+				lockTimer = false
 
-			# Send result back to client
-			if callback then callback result
-		
+				# Send result back to client
+				if callback then callback result
+			
 		# Log
 		everyone.now.log = ->
 			nowpad.log()
@@ -276,80 +326,88 @@ nowpad =
 		# A document is preparing for sync
 		everyone.now.valueSyncDocument = (documentId, callback) ->
 			# Fetch document
-			document = nowpad.documents.get documentId
+			nowpad.documents.fetch documentId, (err,document) =>
+				# Error
+				if err
+					console.log err
+					return
+				
+				# Fetch values
+				state = document.state
+				value = document.value
+				delay = document.delay
+
+				# Send back
+				callback state, value, delay
+
+				# Log
+				console.log 'Valuing', @now.clientId, 'for document', documentId
 			
-			# Fetch values
-			state = document.state
-			value = document.value
-			delay = document.delay
-
-			# Send back
-			callback state, value, delay
-
-			# Log
-			console.log 'Valuing', @now.clientId, 'for document', documentId
-		
 		# Sync
 		everyone.now.patchSyncDocument = (documentId,clientState,patch,callback) ->
 			# Fetch document
-			document = nowpad.documents.get documentId
-			
-			# Prepare
-			stateQueue = []
-			document.state = document.state || 0
-
-			# Log
-			console.log '\nSyncing ['+@now.clientId+'/'+documentId+']'
-			console.log document
-			console.log ''
-
-			# Update Client
-			if clientState isnt document.state
-				# Requires Updates
-
-				# Add patches
-				stateQueue = document.states.slice clientState
+			nowpad.documents.fetch documentId, (err,document) =>
+				# Error
+				if err
+					console.log err
+					return
 				
-				# Log
-				console.log 'Syncing from', clientState, 'to', document.state
-				console.log stateQueue
-				console.log ''
-
-			# Update Server
-			if patch
-				# Update
-				document.state++
+				# Prepare
+				stateQueue = []
+				document.state = document.state || 0
 
 				# Log
-				console.log 'Received patch:', @now.clientId, 'from', clientState, 'to', document.state
-				console.log patch
+				console.log '\nSyncing ['+@now.clientId+'/'+documentId+']'
+				console.log document
 				console.log ''
 
-				# State
-				State =
-					id: document.state
-					patch: patch
-					clientId: @now.clientId
+				# Update Client
+				if clientState isnt document.state
+					# Requires Updates
+
+					# Add patches
+					stateQueue = document.states.slice clientState
+					
+					# Log
+					console.log 'Syncing from', clientState, 'to', document.state
+					console.log stateQueue
+					console.log ''
+
+				# Update Server
+				if patch
+					# Update
+					document.state++
+
+					# Log
+					console.log 'Received patch:', @now.clientId, 'from', clientState, 'to', document.state
+					console.log patch
+					console.log ''
+
+					# State
+					State =
+						id: document.state
+						patch: patch
+						clientId: @now.clientId
+					
+					# Add
+					stateQueue.push State
+					document.states.push State
+
+					# Apply
+					result = nowpadCommon.applyPatch patch, document.value
+					document.value = result.value
+
+				# Return updates to client
+				callback(stateQueue,document.state)
 				
-				# Add
-				stateQueue.push State
-				document.states.push State
+				# Notify other clients
+				if patch
+					# Notify nowpad clients
+					everyone.now.notifySync document.id, document.state
 
-				# Apply
-				result = nowpadCommon.applyPatch patch, document.value
-				document.value = result.value
-
-			# Return updates to client
-			callback(stateQueue,document.state)
-			
-			# Notify other clients
-			if patch
-				# Notify nowpad clients
-				everyone.now.syncNotify document.id, document.state
-
-				# Notify application
-				nowpad.trigger 'sync', [document.id, document.value, document.state]
-	
+					# Notify application
+					nowpad.trigger 'sync', [document.id, document.value, document.state]
+		
 	# Bind
 	bind: (event,callback) ->
 		if typeof nowpad.events[event] is 'undefined'

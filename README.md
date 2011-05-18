@@ -21,7 +21,11 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 
 1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
-2. Install NowPad
+2. Install CoffeeScript
+		
+		npm -g install coffee-script
+
+3. Install NowPad
 
 		npm -g install nowpad
 
@@ -96,6 +100,10 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 
 
 ## History
+
+- v0.10 May 18, 2011
+	- Added `nowpad.addDocument(documentId,value)` and `nowpad.delDocument(documentId)` and `nowpad.requestDocument(requestHandler(documentId,next(added)))` for extra security
+	- And other fixes
 
 - v0.9 May 15, 2011
 	- Rewrote in CoffeeScript
