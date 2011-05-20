@@ -131,17 +131,24 @@
 							selectionStart: @element.selectionStart
 							selectionEnd: @element.selectionEnd
 		
+		# Select a line
+		line: (line) ->
+			if line
+				switch @elementType
+					when 'ace'
+						@element.gotoLine line
+		
 		# Add CSS Class
 		addClass: (name) ->
 			switch @elementType
 				when 'jquery'
-					@element.addClass(name)
+					@element.addClass name
 		
 		# Remove CSS Class
 		removeClass: (name) ->
 			switch @elementType
 				when 'jquery'
-					@element.removeClass(name)
+					@element.removeClass name
 		
 		# Change Event
 		change: (callback) ->
@@ -183,11 +190,16 @@
 			@element = new Element element
 
 			# Send off initial sync
-			window.now.valueSyncDocument @documentId, (state,value,delay) =>
+			window.now.nowpad_valueSyncDocument @documentId, (state,value,delay) =>
 				@lastCurrentValue = @lastSyncedValue = value
 				@lastSyncedState = state
 				@timerDelay = delay
 				@element.value value
+				window.setTimeout(
+					=>
+						@element.line 1
+					500
+				)
 			
 			# Bind to change event
 			@element.change =>
@@ -243,7 +255,7 @@
 			# Timeout function used before server requests
 			timeoutCallback = =>
 				# Unlock
-				window.now.unlockDocument @documentId
+				window.now.nowpad_unlockDocument @documentId
 
 				# Feedback
 				@element.removeClass 'sync'
@@ -251,7 +263,7 @@
 			
 			# Grab a lock
 			timeoutInterval = window.setTimeout timeoutCallback, @timeoutDelay
-			window.now.lockDocument @documentId, (lockSuccess) =>
+			window.now.nowpad_lockDocument @documentId, (lockSuccess) =>
 				window.clearTimeout timeoutInterval
 
 				# Success
@@ -267,7 +279,7 @@
 
 					# Sync
 					timeoutInterval = window.setTimeout timeoutCallback, @timeoutDelay
-					window.now.patchSyncDocument @documentId, @lastSyncedState, patch, (_states,_state) =>
+					window.now.nowpad_patchSyncDocument @documentId, @lastSyncedState, patch, (_states,_state) =>
 						clearTimeout timeoutInterval
 
 						# Log
@@ -286,7 +298,7 @@
 								@sync()
 						
 						# Unlock
-						window.now.unlockDocument @documentId
+						window.now.nowpad_unlockDocument @documentId
 
 						# Feedback
 						@element.removeClass 'sync'
@@ -422,7 +434,7 @@
 			# Wait for now
 			window.now.ready ->
 				# Handshake
-				window.now.handshake(
+				window.now.nowpad_handshake(
 					# Sync notify
 					(documentId, state) ->
 						console.log 'Sync notify called: ', documentId, state
@@ -438,7 +450,6 @@
 					(clientId) ->
 						nowpad.clientId = clientId
 						nowpad.ready = true
-						document.title = clientId
 						for instance in nowpad.pendingInstances
 							nowpad.createInstance instance.config, instance.callback
 				)

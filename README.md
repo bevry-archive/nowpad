@@ -103,6 +103,7 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 
 - v0.10 May 18, 2011
 	- Added `nowpad.addDocument(documentId,value)` and `nowpad.delDocument(documentId)` and `nowpad.requestDocument(requestHandler(documentId,next(added)))` for extra security
+	- Namespaced now events and callbacks
 	- And other fixes
 
 - v0.9 May 15, 2011

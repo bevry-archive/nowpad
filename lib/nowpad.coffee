@@ -259,15 +259,15 @@ nowpad =
 			console.log 'Bye Client:', clientId
 		
 		# A client is shaking hands with the server
-		everyone.now.handshake = (notifySync,notifyDelay,callback) ->
+		everyone.now.nowpad_handshake = (notifySync,notifyDelay,callback) ->
 			# Check the user isn't evil
 			if (typeof notifySync isnt 'function') or (typeof notifyDelay isnt 'function')
 				console.log 'Evil client'
 				return false
 			
 			# Apply the client-side functions used to notify the client to the now session
-			@now.notifySync = notifySync
-			@now.notifyDelay = notifyDelay
+			@now.nowpad_notifySync = notifySync
+			@now.nowpad_notifyDelay = notifyDelay
 
 			# Trigger the callback
 			if callback then callback(@now.clientId)
@@ -277,7 +277,7 @@ nowpad =
 		lockTimerDelay = 1500
 
 		# Lock a document
-		everyone.now.lockDocument = (documentId, callback) ->
+		everyone.now.nowpad_lockDocument = (documentId, callback) ->
 			# Fetch Document
 			nowpad.documents.fetch documentId, (err,document) =>
 				# Error
@@ -301,7 +301,7 @@ nowpad =
 				if callback then callback result
 			
 		# Unlock
-		everyone.now.unlockDocument = (documentId, callback) ->
+		everyone.now.nowpad_unlockDocument = (documentId, callback) ->
 			# Fetch Document
 			nowpad.documents.fetch documentId, (err,document) =>
 				# Error
@@ -320,11 +320,11 @@ nowpad =
 				if callback then callback result
 			
 		# Log
-		everyone.now.log = ->
+		everyone.now.nowpad_log = ->
 			nowpad.log()
 		
 		# A document is preparing for sync
-		everyone.now.valueSyncDocument = (documentId, callback) ->
+		everyone.now.nowpad_valueSyncDocument = (documentId, callback) ->
 			# Fetch document
 			nowpad.documents.fetch documentId, (err,document) =>
 				# Error
@@ -344,7 +344,7 @@ nowpad =
 				console.log 'Valuing', @now.clientId, 'for document', documentId
 			
 		# Sync
-		everyone.now.patchSyncDocument = (documentId,clientState,patch,callback) ->
+		everyone.now.nowpad_patchSyncDocument = (documentId,clientState,patch,callback) ->
 			# Fetch document
 			nowpad.documents.fetch documentId, (err,document) =>
 				# Error
@@ -403,7 +403,7 @@ nowpad =
 				# Notify other clients
 				if patch
 					# Notify nowpad clients
-					everyone.now.notifySync document.id, document.state
+					everyone.now.nowpad_notifySync document.id, document.state
 
 					# Notify application
 					nowpad.trigger 'sync', [document.id, document.value, document.state]
