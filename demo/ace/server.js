@@ -23,7 +23,9 @@ app.configure(function(){
 	app.use(express.bodyParser());
 
 	// Nowpad
-	nowpad.setup(app);
+	myNowpad = nowpad.createInstance({
+		server: app
+	});
 });
 
 // Routes
@@ -40,22 +42,22 @@ console.log("Express server listening on port %d", app.address().port);
 // NowPad
 
 // Initialise documents
-nowpad.addDocument('doc1','this is doc1');
-nowpad.addDocument('doc2','this is doc2');
+myNowpad.addDocument('doc1','this is doc1');
+myNowpad.addDocument('doc2','this is doc2');
 
 // Fires when an unknown document is requested
-nowpad.requestDocument(function(documentId,callback){
+myNowpad.requestDocument(function(documentId,callback){
 	// nowpad.addDocument(documentId);
 	// callback(true);
 	callback(false);
 });
 
 // Fires when a change is synced to the document
-nowpad.bind('sync',function(document,value){
+myNowpad.bind('sync',function(document,value){
 	// ...
 });
 
 // Fires when all the clients have disconnected from a document
-nowpad.bind('disconnected', function(document,value){
+myNowpad.bind('disconnected', function(document,value){
 	
 });

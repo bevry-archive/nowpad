@@ -5,7 +5,6 @@ path = require 'path'
 coffee = require 'coffee-script'
 nowpadCommon = require(__dirname+'/public/common.coffee').nowpadCommon
 List = nowpadCommon.List
-nowpad = {}
 
 # -------------------------------------
 # Classes
@@ -13,27 +12,27 @@ nowpad = {}
 class Client
 	# Required
 	id: null
-	info: {}
+	nowpad: null
 
 	# Optional
 	documentIds: []
 
 	# Constructor
-	constructor: (id,info) ->
+	constructor: (id,nowpad) ->
 		# Reset
 		@documentIds = []
 
 		# Apply
 		@id = id
-		@info = info || {}
+		@nowpad = nowpad
 	
 	# Destroy
 	destroy: ->
 		# Prepare
 		clientId = @id
 
-		# Remvoe
-		nowpad.clients.remove clientId
+		# Remove
+		@nowpad.clients.remove clientId
 
 		# Clear Documents
 		documentIds = @documentIds
@@ -41,7 +40,7 @@ class Client
 
 		# Destroy Documents
 		for documentId in documentIds
-			document = nowpad.documents.get documentId
+			document = @nowpad.documents.get documentId
 			if document and typeof document.clientIds[clientId] is not 'undefined'
 				delete document.clientIds[clientId]
 				if document.clientIds.length is 0
@@ -53,6 +52,7 @@ class Client
 class Document
 	# Required
 	id: null
+	nowpad: null
 
 	# Optional
 	value: ''
@@ -64,14 +64,15 @@ class Document
 	clientIds: []
 
 	# Constructor
-	constructor: (id,value) ->
+	constructor: (id,value,nowpad) ->
 		# Reset
 		@states = []
 		@clientIds = []
 
 		# Apply
 		@id = id
-		if value then @value = value
+		@value = value if value
+		@nowpad = nowpad
 
 	# Lock
 	lock: (clientId) ->
@@ -107,7 +108,7 @@ class Document
 		documentId = @id
 
 		# Remvoe
-		nowpad.clients.remove documentId
+		@nowpad.clients.remove documentId
 
 		# Clear Clients
 		clientIds = @clientIds
@@ -115,7 +116,7 @@ class Document
 
 		# Destroy Clients
 		for clientId in clientIds
-			client = nowpad.clients.get clientId
+			client = @nowpad.clients.get clientId
 			if client and typeof document.documentIds[documentId] is not 'undefined'
 				delete document.documentIds[documentId]
 				if client.documentIds.length is 0
@@ -125,31 +126,37 @@ class Document
 		console.log 'Destroyed Document', documentId
 
 class DocumentList extends List
+	# Init
+	constructor: (nowpad) ->
+		@nowpad = nowpad
+	
 	# Get a document, or create it if it doesn't exist
 	# next(err,document)
 	fetch: (id,next) ->
 		document = @get id
 		if document
 			next false, document
-		else if nowpad.requestHandler
-			nowpad.requestHandler id, =>
+		else if @nowpad.requestHandler
+			@nowpad.requestHandler id, =>
 				document = @get id
 				if document
 					next false, document
 				else
 					next Error 'Could not fetch the document '+id
 		else
-			document = new Document id
-			nowpad.documents.add document
+			document = new Document id, false, @nowpad
+			@nowpad.documents.add document
 			next false, document
 
 # -------------------------------------
 # Server
 
-nowpad =
+class Nowpad
+
 	# Server
-	app: null
+	server: null
 	everyone: null
+	port: null
 	filePath: __dirname
 	fileNames: [
 		'public/diff_match_patch.js'
@@ -159,8 +166,8 @@ nowpad =
 	fileString: ''
 
 	# Nowpad
-	documents: new DocumentList()
-	clients: new List()
+	documents: null
+	clients: null
 	requestHandler: null
 	
 	# Events
@@ -169,55 +176,58 @@ nowpad =
 		disconnected: []
 	
 	# Initialise
-	init: ->
-		nowpad.cacheClientScript()
-	
+	constructor: ({server,everyone}={}) ->
+		# Prepare
+		@server = server
+		@everyone = everyone || now.initialize @server, {clientWrite: false}
+
+		# Clean
+		@documents = new DocumentList(@)
+		@clients = new List()
+
+		# Now
+		@nowBind()
+
+		# Cache
+		@cacheClientScript()
+
+		# Routes
+		@server.get '/nowpad/nowpad.js', (req,res) =>
+			@serveClientScript(req,res)
+
+		# Clean
+		@documents = new DocumentList(@)
+		@clients = new List()
+
 	# Cache the client script
 	cacheClientScript: ->
-		nowpad.fileString = ''
-		nowpad.fileNames.forEach (value) ->
-			fileFullPath = nowpad.filePath+'/'+value
-			fs.readFile fileFullPath, (err,data) ->
+		@fileString = ''
+		@fileNames.forEach (value) =>
+			fileFullPath = @filePath+'/'+value
+			fs.readFile fileFullPath, (err,data) =>
 				throw err if err
 				if path.extname(fileFullPath) is '.coffee'
-					nowpad.fileString += coffee.compile(data.toString())
+					@fileString += coffee.compile(data.toString())
 				else
-					nowpad.fileString += data.toString()
+					@fileString += data.toString()
 	
 	# Server the client script
 	serveClientScript: (req,res) ->
 		res.writeHead 200, 'content-type': 'text/javascript'
-		res.write nowpad.fileString
+		res.write @fileString
 		res.end()
-	
-	# Setup
-	setup: (app,everyone) ->
-		# Server
-		@app = app
-
-		# Everyone
-		if everyone
-			@everyone = everyone
-		else
-			@everyone = now.initialize @app, {clientWrite: false}
-
-		# Routes
-		@app.get '/nowpad/nowpad.js', @serveClientScript
-		
-		# Now
-		@nowBind()
 	
 	# Log
 	log: ->
 		console.log(
-			clients: nowpad.clients
-			documents: nowpad.documents
+			clients: @clients
+			documents: @documents
 		)
 	
 	# Add document
 	addDocument: (documentId,value) ->
 		unless @documents.has documentId
-			document = new Document documentId, value
+			document = new Document documentId, value, @
 			@documents.add document
 
 	# Delete document
@@ -234,13 +244,14 @@ nowpad =
 	
 	# Initialise Now.js
 	nowBind: ->
+		nowpad = @
 		everyone = @everyone
 
 		# A client has connected
 		everyone.connected ->
 			# Create the new client
 			clientId = nowpad.clients.generateId()
-			client = new Client(clientId)
+			client = new Client(clientId,nowpad)
 			nowpad.clients.add(client)
 
 			# Associate it with now
@@ -410,18 +421,20 @@ nowpad =
 		
 	# Bind
 	bind: (event,callback) ->
-		if typeof nowpad.events[event] is 'undefined'
+		if typeof @events[event] is 'undefined'
 			throw new Error 'Unauthorised event: '+event
 		else
-			nowpad.events[event].push callback
+			@events[event].push callback
 	
 	# Trigger
 	trigger: (event,args) ->
-		nowpad.events[event].forEach (callback) ->
+		@events[event].forEach (callback) ->
 			callback.apply(callback,args)
 
-# Initialise
-nowpad.init()
+# API
+nowpad =
+	createInstance: (config) ->
+		return new Nowpad(config)
 
 # Export
 module.exports = nowpad

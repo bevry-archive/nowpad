@@ -51,10 +51,12 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 	nowpad = require('nowpad');
 
 	// Setup with your Express Server
-	nowpad.setup(app);
+	myNowpad = nowpad.createInstance({
+		server: app // where app is your express server
+	});
 
 	// Bind to Document Changes
-	nowpad.bind('sync',function(value){});
+	myNowpad.bind('sync',function(value){});
 	```
 
 - Client Side
@@ -100,6 +102,9 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 
 
 ## History
+
+- v0.11 May 20, 2011
+	- Now supports multiple instances of nowpad for multi server configurations
 
 - v0.10 May 18, 2011
 	- Added `nowpad.addDocument(documentId,value)` and `nowpad.delDocument(documentId)` and `nowpad.requestDocument(requestHandler(documentId,next(added)))` for extra security
