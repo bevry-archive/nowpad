@@ -417,9 +417,9 @@
 			
 			# Done
 			return patchValue
-		
+	
 	# NowPad
-	nowpad = window.nowpad =
+	nowpad = window.nowpad = {
 		# Variables
 		ready: false
 		clientId: null
@@ -464,7 +464,8 @@
 				if callback then callback(pad)
 			else
 				@pendingInstances.push {config,callback}
-	
+	}
+
 	# Initialise
 	nowpad.init()
 	

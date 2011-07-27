@@ -42,3 +42,7 @@
 		4. Apply the new user differences to the pad
 		5. If there were new user differences, queue a sync event
 		6. Release the lock on the document with the server
+
+## What could be improved?
+
+- Locking needs to have a queue system surrounding it, so that one client does hog all the locks

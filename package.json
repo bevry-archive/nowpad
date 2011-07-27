@@ -43,13 +43,10 @@
 		"url" : "http://github.com/balupton/nowpad.git"
 	},
 	"dependencies": {
-		"now": ">=0.5.2",
-		"express": ">=2.2.2",
-		"ejs": ">=0.4.1",
-		"es5-shim": "1.0.0",
-		"socket.io": ">=0.6.1",
-		"node-proxy": ">=0.4.0",
-		"coffee-script": ">=1.1.1"
+		"now": "=0.7.3",
+		"express": "=2.4.3",
+		"ejs": "=0.4.3",
+		"buildr": "=0.6.4"
 	},
 	"engines" : {
 		"node": ">=0.4.0"

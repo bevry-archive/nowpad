@@ -2,7 +2,7 @@
 fs = require 'fs'
 now = require 'now'
 path = require 'path'
-coffee = require 'coffee-script'
+buildr = require 'buildr'
 nowpadCommon = require(__dirname+'/public/common.coffee').nowpadCommon
 List = nowpadCommon.List
 
@@ -157,13 +157,26 @@ class Nowpad
 	server: null
 	everyone: null
 	port: null
-	filePath: __dirname
-	fileNames: [
-		'public/diff_match_patch.js'
-		'public/common.coffee'
-		'public/client.coffee'
-	]
-	fileString: ''
+	buildrConfig: 
+			# Paths
+			srcPath: __dirname+'/public'
+			outPath: __dirname+'/public'
+
+			# Checking
+			checkScripts: true
+
+			# Compression (requires outPath)
+			compressScripts: true # Array or true or false
+
+			# Order
+			scriptsOrder: [
+				'diff_match_patch.js'
+				'common.coffee'
+				'client.coffee'
+			]
+
+			# Bundling
+			bundleScriptPath: __dirname+'/public/out.js'
 
 	# Nowpad
 	documents: null
@@ -201,18 +214,18 @@ class Nowpad
 
 	# Cache the client script
 	cacheClientScript: ->
-		@fileString = ''
-		@fileNames.forEach (value) =>
-			fileFullPath = @filePath+'/'+value
-			fs.readFile fileFullPath, (err,data) =>
-				throw err if err
-				if path.extname(fileFullPath) is '.coffee'
-					@fileString += coffee.compile(data.toString())
-				else
-					@fileString += data.toString()
+		# Build
+		mercuryBuildr = buildr.createInstance @buildrConfig
+		mercuryBuildr.process (err) =>
+			throw err  if err
+			console.log 'Building completed'
+			fs.readFile @buildrConfig.bundleScriptPath, (err,data) =>
+				throw err  if err
+				@fileString = data.toString()
 	
 	# Server the client script
 	serveClientScript: (req,res) ->
+		console.log @fileString
 		res.writeHead 200, 'content-type': 'text/javascript'
 		res.write @fileString
 		res.end()
@@ -248,7 +261,7 @@ class Nowpad
 		everyone = @everyone
 
 		# A client has connected
-		everyone.connected ->
+		everyone.on 'join', ->
 			# Create the new client
 			clientId = nowpad.clients.generateId()
 			client = new Client(clientId,nowpad)
@@ -261,7 +274,7 @@ class Nowpad
 			console.log 'New Client:', clientId
 
 		# A client has disconnected
-		everyone.disconnected ->
+		everyone.on 'leave', ->
 			# Fetch
 			clientId = @now.clientId
 			nowpad.clients.destroy @now.clientId
@@ -428,7 +441,7 @@ class Nowpad
 	
 	# Trigger
 	trigger: (event,args) ->
-		@events[event].forEach (callback) ->
+		for own event, callback of @events
 			callback.apply(callback,args)
 
 # API
