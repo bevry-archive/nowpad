@@ -1,1 +1,2 @@
-require(__dirname+'/demo/ace/server.js');
+require('coffee-script');
+require(__dirname+'/server.coffee');

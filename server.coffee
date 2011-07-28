@@ -1,0 +1,1 @@
+require __dirname+'/examples/ace/server.coffee'

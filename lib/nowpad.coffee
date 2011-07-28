@@ -166,7 +166,7 @@ class Nowpad
 			checkScripts: false
 
 			# Compression (requires outPath)
-			compressScripts: true # Array or true or false
+			compressScripts: false # Array or true or false
 
 			# Order
 			scriptsOrder: [

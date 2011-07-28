@@ -106,6 +106,8 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 - v0.12 July 28, 2011
 	- Fixed out of date packages issue
 	- Fixed basic demo
+	- Fixed focus issue with multiple pads for the same document
+	- Made ace demo the default
 
 - v0.11 May 20, 2011
 	- Now supports multiple instances of nowpad for multi server configurations

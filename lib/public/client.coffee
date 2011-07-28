@@ -28,6 +28,40 @@
 				else
 					throw new Error 'Unknown element type'
 		
+		# Active
+		active: (value) ->
+			# Prepare
+			result = false
+
+			# Apply?
+			if value? and value is true
+				switch @elementType
+					when 'ace'
+						@element.textInput.getElement().focus()
+
+					when 'jquery'
+						@element.get(0).focus()
+					
+					when 'native'
+						@element.focus()
+				
+				result = true
+			
+			# Fetch
+			else
+				switch @elementType
+					when 'ace'
+						@element.textInput.getElement().focus() is document.activeElement
+					
+					when 'jquery'
+						result = @element.find(document.activeElement).add(@element.filter(document.activeElement))
+					
+					when 'native'
+						result = @element is document.activeElement
+			
+			# Return
+			result
+		
 		# Value
 		value: (value) ->
 			# Apply
@@ -379,8 +413,11 @@
 				)
 
 				# Apply cursor
-				console.log 'applying cursor:', @selectionRange
-				@element.selectionRange @selectionRange, newCurrentValue
+				if @element.active()
+					console.log 'applying cursor:', @selectionRange
+					@element.selectionRange @selectionRange, newCurrentValue
+				else
+					console.log 'skipping cursor for element:', @element
 			
 			# Apply ssync changes
 			@newSyncedStates = []
