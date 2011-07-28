@@ -46,7 +46,8 @@
 		"now": "=0.7.3",
 		"express": "=2.4.3",
 		"ejs": "=0.4.3",
-		"buildr": "=0.6.4"
+		"buildr": "=0.6.4",
+		"coffee-script": "=1.1.1"
 	},
 	"engines" : {
 		"node": ">=0.4.0"

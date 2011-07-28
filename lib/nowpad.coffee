@@ -163,7 +163,7 @@ class Nowpad
 			outPath: __dirname+'/public'
 
 			# Checking
-			checkScripts: true
+			checkScripts: false
 
 			# Compression (requires outPath)
 			compressScripts: true # Array or true or false
@@ -382,7 +382,7 @@ class Nowpad
 
 				# Log
 				console.log '\nSyncing ['+@now.clientId+'/'+documentId+']'
-				console.log document
+				#console.log document
 				console.log ''
 
 				# Update Client
@@ -441,7 +441,7 @@ class Nowpad
 	
 	# Trigger
 	trigger: (event,args) ->
-		for own event, callback of @events
+		for callback in @events[event]
 			callback.apply(callback,args)
 
 # API
