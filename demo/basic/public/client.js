@@ -1,30 +1,26 @@
 (function(window,undefined){
 	// Prepare
 	var
-		// Globals
 		jQuery = window.jQuery, $ = jQuery,
-		nowpadClient = window.nowpadClient,
-		// Client
-		Client = window.Client = {
-			// Elements
-			nowpad: null,
+		nowpad = window.nowpad;
 
-			// Initialise
-			init: function(){
-				// Prepare
-				var me = this;
+	// DomReady
+	$(function(){
+		// Create Instance
+		var createInstance = function(elementId,documentId){
+			// ACE
+			var editor = document.getElementById(elementId);
 
-				// DomReady
-				$(function(){
-					// Nowpadify
-					me.nowpad = new nowpadClient({
-						pad: $('#pad')
-					});
-					// $('#pad').nowpad();
-				});
-			}
-		};
+			// Nowpad
+			nowpad.createInstance({
+				element: editor,
+				documentId: documentId
+			});
+		}
 
-	// Initialise
-	Client.init();
+		// Create Pads
+		createInstance('pad1','doc1');
+	});
+
+
 })(window);

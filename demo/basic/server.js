@@ -23,14 +23,16 @@ app.configure(function(){
 	app.use(express.bodyParser());
 
 	// Nowpad
-	nowpad.setup(app);
+	myNowpad = nowpad.createInstance({
+		server: app
+	});
 });
 
 // Routes
 app.get('/', function(req, res){
-  res.render('doc', {locals: {
-    title: 'NowPad!'
-  }});
+	res.render('doc', {locals: {
+		title: 'NowPad!'
+	}});
 });
 
 // Init
@@ -38,6 +40,14 @@ app.listen(9572);
 console.log("Express server listening on port %d", app.address().port);
 
 // NowPad
-nowpad.bind('sync',function(value){
-	// ...
+
+// Initialise documents
+myNowpad.addDocument('doc1','this is doc1');
+myNowpad.addDocument('doc2','this is doc2');
+
+// Fires when an unknown document is requested
+myNowpad.requestDocument(function(documentId,callback){
+	// nowpad.addDocument(documentId);
+	// callback(true);
+	callback(false);
 });

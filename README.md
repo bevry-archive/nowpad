@@ -103,6 +103,10 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 
 ## History
 
+- v0.12 July 28, 2011
+	- Fixed out of date packages issue
+	- Fixed basic demo
+
 - v0.11 May 20, 2011
 	- Now supports multiple instances of nowpad for multi server configurations
 
