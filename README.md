@@ -9,6 +9,7 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 * [Express.js](http://expressjs.com/) - The "Server" in Server Side Javascript
 * [Now.js](http://nowjs.com/) - Server and Client Side Communication
 * [CoffeeScript](http://jashkenas.github.com/coffee-script/) - JavaScript Made Easy
+* [Buildr](https://github.com/balupton/buildr.npm) - (Java|Coffee)Script Bundling Made Easy
 
 
 ## Trying
@@ -21,42 +22,61 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 
 1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
 
-2. Install CoffeeScript
+2. Install [CoffeeScript](http://jashkenas.github.com/coffee-script/)
 		
-		npm -g install coffee-script
+		npm install -g coffee-script
 
 3. Install NowPad
 
-		npm -g install nowpad
+		npm install -g nowpad
 
 
 ## Running Installed Demos
 
-- Basic single textarea demo
+- The default demo
 
-		nowpad basic # http://localhost:9572/
+		nowpad # http://localhost:9572/
 
 - [ACE Code Editor](http://ace.ajax.org/) demo
 
 		nowpad ace # http://localhost:9572/
 
+- If for some reason the nowpad command doesn't work, use the following instead:
+
+		git clone git://github.com/balupton/nowpad.git
+		cd nowpad
+		coffee bin/nowpad.coffee # http://localhost:9572/
+
 
 ## Implementing
 
 - Server Side
-	
-	``` javascript
-	// Include NowPad
-	require('coffee-script')
-	nowpad = require('nowpad');
 
-	// Setup with your Express Server
-	myNowpad = nowpad.createInstance({
-		server: app // where app is your express server
-	});
+	``` coffeescript
+	# Include NowPad
+	nowpad = require 'nowpad'
 
-	// Bind to Document Changes
-	myNowpad.bind('sync',function(value){});
+	# Setup with your Express Server
+	myNowpad = nowpad.createInstance server: yourExpressServer
+
+	# Create known documents
+	myNowpad.addDocument 'doc1', 'this is doc1'
+	myNowpad.addDocument 'doc2', 'this is doc2'
+
+	# Handle unknown document
+	# Fires when an unknown document is requested
+	myNowpad.requestDocument (documentId, callback) ->
+		# nowpad.addDocument documentId
+		# callback true
+		callback false
+
+	# Handle sync request
+	# Fires when a change is synced to the document
+	myNowpad.bind 'sync', (document, value) ->
+
+	# Handle disconnect request
+	# Fires when all the clients have disconnected from a document
+	myNowpad.bind 'disconnected', (document, value) ->
 	```
 
 - Client Side
@@ -93,12 +113,8 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 
 ## Learning
 
-[You can find the roadmap here](https://github.com/balupton/nowpad/wiki/Roadmap)
-
-
-## Known Issues
-
-- None!
+- [Roadmap](https://github.com/balupton/nowpad/wiki/Roadmap)
+- [How it works](https://github.com/balupton/nowpad/blob/master/DEV.md)
 
 
 ## History
