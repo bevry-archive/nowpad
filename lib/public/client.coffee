@@ -51,10 +51,10 @@
 			else
 				switch @elementType
 					when 'ace'
-						@element.textInput.getElement().focus() is document.activeElement
+						result = @element.textInput.getElement() is document.activeElement
 					
 					when 'jquery'
-						result = @element.find(document.activeElement).add(@element.filter(document.activeElement))
+						result = @element.find(document.activeElement).add(@element.filter(document.activeElement)).length isnt 0
 					
 					when 'native'
 						result = @element is document.activeElement
