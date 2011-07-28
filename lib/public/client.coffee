@@ -192,7 +192,7 @@
 				when 'jquery'
 					@element.keyup callback
 				when 'native'
-					@element.addEventListener 'change', callback, false
+					@element.addEventListener 'keyup', callback, false
 	
 
 	class Pad

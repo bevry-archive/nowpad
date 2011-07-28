@@ -124,6 +124,7 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 	- Fixed basic demo
 	- Fixed focus issue with multiple pads for the same document
 	- Made ace demo the default
+	- Fixed native textarea elements delay - they had change instead of keyup
 
 - v0.11 May 20, 2011
 	- Now supports multiple instances of nowpad for multi server configurations
