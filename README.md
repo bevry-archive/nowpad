@@ -15,10 +15,10 @@ Nowpad is no longer maintained and the [now](https://www.npmjs.org/package/now) 
 
 <!-- BADGES/ -->
 
-[![Build Status](http://img.shields.io/travis-ci/bevry/nowpad.png?branch=master)](http://travis-ci.org/bevry/nowpad "Check this project's build status on TravisCI")
+[![Build Status](http://img.shields.io/travis-ci/balupton/nowpad.png?branch=master)](http://travis-ci.org/balupton/nowpad "Check this project's build status on TravisCI")
 [![NPM version](http://badge.fury.io/js/nowpad.png)](https://npmjs.org/package/nowpad "View this project on NPM")
-[![Dependency Status](https://david-dm.org/bevry/nowpad.png?theme=shields.io)](https://david-dm.org/bevry/nowpad)
-[![Development Dependency Status](https://david-dm.org/bevry/nowpad/dev-status.png?theme=shields.io)](https://david-dm.org/bevry/nowpad#info=devDependencies)<br/>
+[![Dependency Status](https://david-dm.org/balupton/nowpad.png?theme=shields.io)](https://david-dm.org/balupton/nowpad)
+[![Development Dependency Status](https://david-dm.org/balupton/nowpad/dev-status.png?theme=shields.io)](https://david-dm.org/balupton/nowpad#info=devDependencies)<br/>
 [![Gittip donate button](http://img.shields.io/gittip/balupton.png)](https://www.gittip.com/balupton/ "Donate weekly to this project using Gittip")
 [![Flattr donate button](http://img.shields.io/flattr/donate.png?color=yellow)](http://flattr.com/thing/344188/balupton-on-Flattr "Donate monthly to this project using Flattr")
 [![PayPayl donate button](http://img.shields.io/paypal/donate.png?color=yellow)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QB8GQPZAH84N6 "Donate once-off to this project using Paypal")
@@ -147,7 +147,7 @@ myNowpad.bind('disconnected', function(document, value){
 <!-- HISTORY/ -->
 
 ## History
-[Discover the change history by heading on over to the `HISTORY.md` file.](https://github.com/bevry/nowpad/blob/master/HISTORY.md#files)
+[Discover the change history by heading on over to the `HISTORY.md` file.](https://github.com/balupton/nowpad/blob/master/HISTORY.md#files)
 
 <!-- /HISTORY -->
 
@@ -156,7 +156,7 @@ myNowpad.bind('disconnected', function(document, value){
 
 ## Contribute
 
-[Discover how you can contribute by heading on over to the `CONTRIBUTING.md` file.](https://github.com/bevry/nowpad/blob/master/CONTRIBUTING.md#files)
+[Discover how you can contribute by heading on over to the `CONTRIBUTING.md` file.](https://github.com/balupton/nowpad/blob/master/CONTRIBUTING.md#files)
 
 <!-- /CONTRIBUTE -->
 
@@ -183,8 +183,11 @@ No sponsors yet! Will you be the first?
 
 ### Contributors
 
-No contributors yet! Will you be the first?
-[Discover how you can contribute by heading on over to the `CONTRIBUTING.md` file.](https://github.com/bevry/nowpad/blob/master/CONTRIBUTING.md#files)
+These amazing people have contributed code to this project:
+
+- [Benjamin Lupton](https://github.com/balupton) <b@lupton.cc> — [view contributions](https://github.com/balupton/nowpad/commits?author=balupton)
+
+[Become a contributor!](https://github.com/balupton/nowpad/blob/master/CONTRIBUTING.md#files)
 
 <!-- /BACKERS -->
 
