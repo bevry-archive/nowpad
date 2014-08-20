@@ -1,0 +1,3 @@
+#!/usr/bin/env node
+require('coffee-script/register')
+require(__dirname+'/../examples/'+(process.argv[2]||'ace')+'/server')

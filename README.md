@@ -1,6 +1,49 @@
+
+## Note
+
+These days there is now [ShareJS](http://sharejs.org/). You should probably use that instead.
+
+Nowpad is no longer maintained and the [now](https://www.npmjs.org/package/now) dependency that nowpad depends on no longer works. Theoritically, the `now` dependency could be swapped out for [primus](https://www.npmjs.org/package/primus), which should take about half a day, but that is not guaranteed to work.
+
+
+<!-- TITLE/ -->
+
 # NowPad: Realtime Text Collaboration
 
-NowPad adds realtime text collaboration to parts of your website such as textareas, allowing multiple people to work on the same document at the same time (while seeing each others changes as they are applied). The benefit of this over traditional collaborative editing is two people would be editing the same document, they've both made changes, one person saves, and the other has to make the choice "lose my changes, or lose his changes". Nowpad keeps and applies both your changes as they happen.
+<!-- /TITLE -->
+
+
+<!-- BADGES/ -->
+
+[![Build Status](http://img.shields.io/travis-ci/bevry/nowpad.png?branch=master)](http://travis-ci.org/bevry/nowpad "Check this project's build status on TravisCI")
+[![NPM version](http://badge.fury.io/js/nowpad.png)](https://npmjs.org/package/nowpad "View this project on NPM")
+[![Dependency Status](https://david-dm.org/bevry/nowpad.png?theme=shields.io)](https://david-dm.org/bevry/nowpad)
+[![Development Dependency Status](https://david-dm.org/bevry/nowpad/dev-status.png?theme=shields.io)](https://david-dm.org/bevry/nowpad#info=devDependencies)<br/>
+[![Gittip donate button](http://img.shields.io/gittip/balupton.png)](https://www.gittip.com/balupton/ "Donate weekly to this project using Gittip")
+[![Flattr donate button](http://img.shields.io/flattr/donate.png?color=yellow)](http://flattr.com/thing/344188/balupton-on-Flattr "Donate monthly to this project using Flattr")
+[![PayPayl donate button](http://img.shields.io/paypal/donate.png?color=yellow)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QB8GQPZAH84N6 "Donate once-off to this project using Paypal")
+[![BitCoin donate button](http://img.shields.io/bitcoin/donate.png?color=yellow)](https://coinbase.com/checkouts/9ef59f5479eec1d97d63382c9ebcb93a "Donate once-off to this project using BitCoin")
+[![Wishlist browse button](http://img.shields.io/wishlist/browse.png?color=yellow)](http://amzn.com/w/2F8TXKSNAFG4V "Buy an item on our wishlist for us")
+
+<!-- /BADGES -->
+
+
+<!-- DESCRIPTION/ -->
+
+NowPad adds realtime text collaboration to parts of your website such as textareas, allowing multiple people to work on the same document at the same time (while seeing each others changes as they are applied). The benefit of this over traditional collaborative editing is two people would be editing the same document, they've both made changes, one person saves, and the other has to make the choice 'lose my changes, or lose his changes'. Nowpad keeps and applies both your changes as they happen.
+
+<!-- /DESCRIPTION -->
+
+
+<!-- INSTALL/ -->
+
+## Install
+
+### [NPM](http://npmjs.org/)
+- Use: `require('nowpad')`
+- Install: `npm install --save nowpad`
+
+<!-- /INSTALL -->
 
 
 ## It Uses
@@ -12,103 +55,87 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 * [Buildr](https://github.com/balupton/buildr.npm) - (Java|Coffee)Script Bundling Made Easy
 
 
-## Trying
-
-[You can try it right now online with no installation right here](http://nowpad.nodester.com)
+## Demo
 
 
-## Installing
+1. Clone and setup this repo
 
-
-1. [Install Node.js](https://github.com/balupton/node/wiki/Installing-Node.js)
-
-2. Install [CoffeeScript](http://jashkenas.github.com/coffee-script/)
-		
-		npm install -g coffee-script
-
-3. Install NowPad
-
-		npm install -g nowpad
-
-
-## Running Installed Demos
-
-- The default demo
-
-		nowpad # http://localhost:9572/
-
-- [ACE Code Editor](http://ace.ajax.org/) demo
-
-		nowpad ace # http://localhost:9572/
-
-- If for some reason the nowpad command doesn't work, use the following instead:
-
-		git clone git://github.com/balupton/nowpad.git
+		git clone https://github.com/balupton/nowpad.git nowpad
 		cd nowpad
-		coffee bin/nowpad.coffee # http://localhost:9572/
+		npm install
+		npm link
+
+2. Start the demo app
+
+		nowpad  # or npm start if inside nowpad directory
 
 
 ## Implementing
 
-- Server Side
+### Server Side
 
-	``` coffeescript
-	# Include NowPad
-	nowpad = require 'nowpad'
+``` javascript
+// Include NowPad
+var nowpad = require('nowpad')
 
-	# Setup with your Express Server
-	myNowpad = nowpad.createInstance server: yourExpressServer
+// Setup with your Express Server
+var myNowpad = nowpad.createInstance({server: yourExpressServer})
 
-	# Create known documents
-	myNowpad.addDocument 'doc1', 'this is doc1'
-	myNowpad.addDocument 'doc2', 'this is doc2'
+	//Create known documents
+myNowpad.addDocument('doc1', 'this is doc1')
+myNowpad.addDocument('doc2', 'this is doc2')
 
-	# Handle unknown document
-	# Fires when an unknown document is requested
-	myNowpad.requestDocument (documentId, callback) ->
-		# nowpad.addDocument documentId
-		# callback true
-		callback false
+// Handle unknown document
+// Fires when an unknown document is requested
+myNowpad.requestDocument(function(documentId, callback){
+	// nowpad.addDocument(documentId)
+	// callback(true)
+	callback false
+})
 
-	# Handle sync request
-	# Fires when a change is synced to the document
-	myNowpad.bind 'sync', (document, value) ->
+// Handle sync request
+// Fires when a change is synced to the document
+myNowpad.bind('sync', function(document, value){
 
-	# Handle disconnect request
-	# Fires when all the clients have disconnected from a document
-	myNowpad.bind 'disconnected', (document, value) ->
+})
+
+// Handle disconnect request
+// Fires when all the clients have disconnected from a document
+myNowpad.bind('disconnected', function(document, value){
+
+})
+```
+
+### Client Side
+
+1. Include Dependencies
+
+	``` html
+	<script src="/nowjs/now.js"></script>
+	<script src="/nowpad/nowpad.js"></script>
 	```
 
-- Client Side
+2. Using NowPad with a Textarea
 
-	- Include Dependencies
-		
-		``` html
-		<script src="/nowjs/now.js"></script>
-		<script src="/nowpad/nowpad.js"></script>
-		```
+	``` javascript
+	// Without jQuery
+	window.nowpad.createInstance({
+		element: document.getElementById('myTextarea'),
+		documentId: 'doc1'
+	});
 
-	- Using NowPad with a Textarea
+	// Or With jQuery
+	$textarea = $('#myTextarea').nowpad('doc1');
+	```
 
-		``` javascript
-		// Without jQuery
-		window.nowpad.createInstance({
-			element: document.getElementById('myTextarea'),
-			documentId: 'doc1'
-		});
+3. Using NowPad with ACE
 
-		// Or With jQuery
-		$textarea = $('#myTextarea').nowpad('doc1');
-		```
-
-	- Using NowPad with ACE
-		
-		``` javascript
-		window.nowpad.createInstance({
-			element: ace.edit('pad'),
-			documentId: 'doc1'
-		});
-		```
+	``` javascript
+	window.nowpad.createInstance({
+		element: ace.edit('pad'),
+		documentId: 'doc1'
+	});
+	```
 
 
 ## Learning
@@ -117,54 +144,59 @@ NowPad adds realtime text collaboration to parts of your website such as textare
 - [How it works](https://github.com/balupton/nowpad/blob/master/DEV.md)
 
 
+<!-- HISTORY/ -->
+
 ## History
+[Discover the change history by heading on over to the `HISTORY.md` file.](https://github.com/bevry/nowpad/blob/master/HISTORY.md#files)
 
-- v0.12 July 28, 2011
-	- Fixed out of date packages issue
-	- Fixed basic demo
-	- Fixed focus issue with multiple pads for the same document
-	- Made ace demo the default
-	- Fixed native textarea elements delay - they had change instead of keyup
+<!-- /HISTORY -->
 
-- v0.11 May 20, 2011
-	- Now supports multiple instances of nowpad for multi server configurations
 
-- v0.10 May 18, 2011
-	- Added `nowpad.addDocument(documentId,value)` and `nowpad.delDocument(documentId)` and `nowpad.requestDocument(requestHandler(documentId,next(added)))` for extra security
-	- Namespaced now events and callbacks
-	- And other fixes
+<!-- CONTRIBUTE/ -->
 
-- v0.9 May 15, 2011
-	- Rewrote in CoffeeScript
-	- Added support for multiple pads, and mutliple documents
+## Contribute
 
-- v0.8 April 29, 2011
-	- Nowpad now works with ACE and TextAreas
+[Discover how you can contribute by heading on over to the `CONTRIBUTING.md` file.](https://github.com/bevry/nowpad/blob/master/CONTRIBUTING.md#files)
 
-- v0.7 April 29, 2011
-	- Nowpad is now a npm package
+<!-- /CONTRIBUTE -->
 
-- v0.6 April 26, 2011
-	- Greatly improved performance
 
-- v0.5 April 26, 2011
-	- Ignores internet explorer and console less browsers
-	- Now will only apply syncs once the user has finished typing
+<!-- BACKERS/ -->
 
-- v0.4 April 25, 2011
-	- New algorithm which ensures data will never get corrupted
+## Backers
 
-- v0.3 April 24, 2011
-	- Server now keeps a copy of the document
+### Maintainers
 
-- v0.2 April 24, 2011
-	- Working on a type together basis with two people
+These amazing people are maintaining this project:
 
-- v0.1 April 24, 2011
-	- Working on a start and stop basis
+- Benjamin Lupton <b@lupton.cc> (https://github.com/balupton)
 
+### Sponsors
+
+No sponsors yet! Will you be the first?
+
+[![Gittip donate button](http://img.shields.io/gittip/balupton.png)](https://www.gittip.com/balupton/ "Donate weekly to this project using Gittip")
+[![Flattr donate button](http://img.shields.io/flattr/donate.png?color=yellow)](http://flattr.com/thing/344188/balupton-on-Flattr "Donate monthly to this project using Flattr")
+[![PayPayl donate button](http://img.shields.io/paypal/donate.png?color=yellow)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=QB8GQPZAH84N6 "Donate once-off to this project using Paypal")
+[![BitCoin donate button](http://img.shields.io/bitcoin/donate.png?color=yellow)](https://coinbase.com/checkouts/9ef59f5479eec1d97d63382c9ebcb93a "Donate once-off to this project using BitCoin")
+[![Wishlist browse button](http://img.shields.io/wishlist/browse.png?color=yellow)](http://amzn.com/w/2F8TXKSNAFG4V "Buy an item on our wishlist for us")
+
+### Contributors
+
+No contributors yet! Will you be the first?
+[Discover how you can contribute by heading on over to the `CONTRIBUTING.md` file.](https://github.com/bevry/nowpad/blob/master/CONTRIBUTING.md#files)
+
+<!-- /BACKERS -->
+
+
+<!-- LICENSE/ -->
 
 ## License
 
-Licensed under the [MIT License](http://creativecommons.org/licenses/MIT/)
-Copyright 2011 [Benjamin Arthur Lupton](http://balupton.com)
+Licensed under 
+
+Copyright &copy; 2011+ Benjamin Lupton <b@lupton.cc> (https://github.com/balupton)
+
+<!-- /LICENSE -->
+
+

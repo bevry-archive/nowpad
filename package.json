@@ -1,62 +1,63 @@
 {
-	"name": "nowpad",
-	"version": "0.12.3",
-	"description": "Realtime Text Collaboration",
-	"homepage": "https://github.com/balupton/nowpad",
-	"keywords": [
-		"javascript",
-		"collab",
-		"collaboration",
-		"sync",
-		"realtime"
-	],
-	"author": {
-		"name": "Benjamin Lupton",
-		"email": "b@lupton.cc",
-		"web": "http://balupton.com"
-	},
-	"maintainers": [
-		{
-			"name": "Benjamin Lupton",
-			"email": "b@lupton.cc",
-			"web": "http://balupton.com"
-		}
-	],
-	"contributors": [
-		{
-			"name": "Benjamin Lupton",
-			"email": "b@lupton.cc",
-			"web": "http://balupton.com"
-		}
-	],
-	"bugs": {
-		"web": "https://github.com/balupton/nowpad/issues"
-	},
-	"licenses": [
-		{
-			"type": "MIT",
-			"url": "http://creativecommons.org/licenses/MIT/"
-		}
-	],
-	"repository" : {
-		"type" : "git",
-		"url" : "http://github.com/balupton/nowpad.git"
-	},
-	"dependencies": {
-		"now": "=0.7.3",
-		"express": "=2.4.3",
-		"ejs": "=0.4.3",
-		"buildr": "=0.6.4",
-		"coffee-script": "=1.1.1"
-	},
-	"engines" : {
-		"node": ">=0.4.0"
-	},
-	"bin": {
-		"nowpad": "./bin/nowpad.coffee"
-	},
-	"directories": {
-		"lib": "lib"
-	},
-	"main": "./lib/nowpad.coffee"
+  "title": "NowPad: Realtime Text Collaboration",
+  "name": "nowpad",
+  "version": "0.12.3",
+  "description": "NowPad adds realtime text collaboration to parts of your website such as textareas, allowing multiple people to work on the same document at the same time (while seeing each others changes as they are applied). The benefit of this over traditional collaborative editing is two people would be editing the same document, they've both made changes, one person saves, and the other has to make the choice 'lose my changes, or lose his changes'. Nowpad keeps and applies both your changes as they happen.",
+  "homepage": "https://github.com/balupton/nowpad",
+  "keywords": [
+    "javascript",
+    "collab",
+    "collaboration",
+    "sync",
+    "realtime"
+  ],
+  "license": {
+    "type": ""
+  },
+  "badges": {
+    "travis": true,
+    "npm": true,
+    "david": true,
+    "daviddev": true,
+    "gittip": "balupton",
+    "flattr": "344188/balupton-on-Flattr",
+    "paypal": "QB8GQPZAH84N6",
+    "bitcoin": "https://coinbase.com/checkouts/9ef59f5479eec1d97d63382c9ebcb93a",
+    "wishlist": "http://amzn.com/w/2F8TXKSNAFG4V"
+  },
+  "author": "2011+ Benjamin Lupton <b@lupton.cc> (https://github.com/balupton)",
+  "maintainers": [
+    "Benjamin Lupton <b@lupton.cc> (https://github.com/balupton)"
+  ],
+  "contributors": [],
+  "bugs": {
+    "url": "https://github.com/bevry/nowpad/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/bevry/nowpad.git"
+  },
+  "engines": {
+    "node": ">=0.4"
+  },
+  "dependencies": {
+    "now": "~0.7.3",
+    "express": "~2.4.3",
+    "ejs": "~0.4.3",
+    "buildr": "~0.8.7",
+    "coffee-script": "~1.7.1"
+  },
+  "devDependencies": {
+    "projectz": "^0.3.15"
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "scripts": {
+    "start": "node ./bin/nowpad"
+  },
+  "bin": {
+    "nowpad": "./bin/nowpad"
+  },
+  "main": "./lib/nowpad.coffee"
 }
